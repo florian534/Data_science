@@ -1,0 +1,1056 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+# NOM PRENOM : DARGEL FLORIAN
+
+Le but de ce TP est d'étudier les algorithmes d'arbres CART et Forêts aléatoires ainsi que l'importance et la sélection de variables avec les jeux de données de spam et d'ozone. 
+
+
+# 1] les données 
+
+On commence tout d'abord à charger la libraire kernlab et on se renseigne sur la base de données spam
+```{r}
+{library(kernlab) #librairie utile pour charger la database spam. Méthodes d'apprentissage automatique basées sur des noyaux pour la classification, la régression, le regroupement, la détection, la régression quantile et la réduction de la dimensionnalité. Parmi d'autres méthodes, "kernlab" inclut les machines à vecteurs de support, le regroupement spectral, l'ACP à noyau, les processus gaussiens et un solveur QP.
+
+?data(spam)
+}
+```
+
+
+    Description : Il s'agit d'un ensemble de données collecté aux laboratoires Hewlett-Packard, qui classe 4601 e-mails comme spam ou non-spam. En plus de cette étiquette de classe, il existe 57 variables indiquant la fréquence de certains mots et caractères dans l'e-mail.
+    
+    Format : Une base  de données avec 4601 observations et 58 variables. 
+    Les 48 premières variables contiennent la fréquence du nom de la variable (par exemple, business) dans l'e-mail. Si le nom de la variable commence par num (par exemple, num650), il indique la fréquence du nombre correspondant (par exemple, 650). Les variables 49-54 indiquent la fréquence des caractères ';', '(', '[', '!', '\$' et '\#'. Les variables 55-57 contiennent la longueur moyenne, la longueur la plus longue et la longueur totale du tirage des lettres capitales. La variable 58 qui est la cible, indique le type de courrier et est soit "non spam", soit "spam", c'est-à-dire un courrier électronique commercial non sollicité. 
+    
+
+    Source : Ces données ont été extraites de l'UCI Repository Of Machine Learning Databases à l'adresse suivante : http://www.ics.uci.edu/~mlearn/MLRepository.html
+    
+La variable cible est le spam, il serait intéressant d'observer la répartion des spams et non spams
+```{r}
+{
+barplot(prop.table(table(spam$type)),
+        col = rainbow(2),
+        ylim = c(0, 0.7),
+        main = "Class Distribution")
+
+cat("\n On a", table(spam$type)[1]/ (table(spam$type)[1] + table(spam$type)[2]) * 100, "% de notre distribution qui sont des non spam")
+cat("\n On a",table(spam$type)[2]/ (table(spam$type)[1] + table(spam$type)[2]) * 100, "% de notre distribution qui sont des spam")
+}
+```
+   
+    - Un indicateur trivial qui pourrait nous servir de référence à un taux d'erreur de 39.40448 % (environ 39% de chance que se soit un spam).
+
+Je prépare par la suite une base d'apprentissage et une base de test.
+
+```{r}
+set.seed(9146301)
+ytable <- table(spam$type)
+app <- c(sample(1:ytable[2], ytable[2]/2), sample((ytable[2] + 1):nrow(spam),
+ytable[1]/2))
+spam.app <- spam[app, ]
+table(spam.app$type)
+
+n <- nrow(spam.app)
+p <- ncol(spam.app) - 1
+spam.test <- spam[-app, ]
+table(spam.test$type)
+```
+
+
+```{r}
+{
+cat("\n On a", (table(spam.app$type)[1] +  table(spam.app$type)[2]) / 4601 * 100, "% de données pour l'entrainement" )
+cat("\n On a un ratio de",table(spam.app$type)[1]/ table(spam.app$type)[2], "pour l'entrainement")
+
+cat("\n \n On a", (table(spam.test$type)[1] +  table(spam.test$type)[2]) / 4601 * 100, "% de données pour le test" )
+cat("\n On a un ratio de", table(spam.test$type)[1]/ table(spam.test$type)[2], "pour le test")
+}
+```
+
+le ratio de spam est conservé. La répartition sur le nombre de spam et non-spam répartis dans la base d’entrainement et de test sont quasiment similaires.
+
+# 2] Arbre cart 
+
+## 2.1] Arbre par défaut
+
+On charge la librairie rpart. Le package R rpart propose une implémentation des méthodes de construction d'arbres de décision inspirées de l'approche CART décrite dans l'ouvrage éponyme de Breiman, Friedman, Olshen et Stone en 1983.
+
+Par défaut, la commande rpart pose : maxdepth = 30, minsplit = 20, minbucket = minsplit
+/ 3 et cp = 0.1.
+```{r}
+library(rpart)
+
+t_def=rpart(type ~ .,data = spam.app) #construction de l'arbre avec les paramètres par défaut fournit par rpart 
+plot(t_def, main="Arbre par defaut")
+text(t_def, cex = 0.5)
+```
+    
+    -On obtient un arbre de classification  de type CART peu complexe et communicable.
+    
+    -On observe qu'avec les paramètres par défaut, l'arbre comporte 7 noeuds internes et 8 feuilles , les splits sont basés sur 7 variables : charDollar, remove, hp, charExclamation, george, capitalLong, edu. La valeur du seuil de coupe de la variable est affiché avec le nom de la variable. On peut voir que l’arbre prédit à gauche la classe nonspam et à droite la classe spam. 
+
+    -Sur l'arbre on peut observer que CharDollar est la meilleur variable qui split au mieux les données.
+
+    -l’arbre généré avec les paramètres par défaut du modèle rpart est un arbre restreint. Nous verrons par la suite qu’il est bien sûr possible de générer un arbre maximal.
+    
+Maintenant que nous avons généré un arbre avec les paramètres par défaut, On peut identifier ces paramètres et les analyser. 
+La fonction summary() permet d’avoir le détail de la construction de l’arbre.
+
+```{r}
+summary(t_def)
+```
+
+**Interpretation du summary** 
+
+    Par exemple lors du 1er split 
+    left son=2 (1683 obs) right son=3 (617 obs): "fils" nous indique le numéro du nœud suivant en dessous de cette division. Les nombres      "obs" correspondent au nombre de données d'entraînement de chaque côté. (1683 vers le fils 2 et 617 vers le fils 3)
+
+    Pour le split compétitif (primary split)  : En tête de liste, la variable qui réalise le gain maximum (variable active de l’arbre) est     charDollar. 
+    les 4 autres variables concurrentes sont : charExclamation, remove, free, your. 
+
+    Pour les splits de substitution (Surrogate splits) , en tête de liste de la partie surrogate, la variable ayant la concordance la plus     forte avec la variable active du noeud est num000.
+    Les 4 autres variables surrogate (par ordre de concordance avec la variable active) sont, money, internet, capitalLong et credit.  
+
+
+
+La fonction summary()nous donne des informations complets. On peut sélectionner uniquement les informations qui nous intéresse. 
+Par exemple, il est important de regarder l'importance de chaque variable (hiérarchisation). 
+```{r}
+t_def$variable.importance
+```
+
+On remarque les variables importantes qui apparaissent sont charDollar (un mail où l'argent apparait a plus de chance d'être un spam que un non spam). Les deux variables suivantes qui sont les plus importantes sont remove et num000.
+
+## 2.2] Arbre de profondeur 1
+On construit cette fois ci un arbre avec une profondeur de 1. 
+
+```{r}
+{
+tstump <- rpart(type ~ ., spam.app, control = rpart.control(maxdepth = 1))
+plot(tstump, main='Arbre de profondeur 1')
+text(tstump)
+
+tstump
+}
+```
+En dessinant un l'arbre de profondeur 1 on se retrouve avec 2 feuilles un noeud interne. la variable comptétitive est charExclamation (la même variable que l'arbre par défaut lors du 1er split). Un arbre avec une pronfondeur de 1 a tendance à avoir une très petite variance mais un biais élevé, on verra cela dans les performances du modèle.
+
+```{r}
+summary(tstump)
+```
+
+En observant le split du noeud interne, pour le split compétitif  et le split de subsitution, on se rend compte que se sont les mêmes variables qui sont apparus dans le même ordre que l'arbre par défaut lors du 1er split.
+
+Pour le split compétitif  : En tête de liste, la variable qui réalise le gain maximum (variable active de l’arbre) est charDollar.
+Suivi de charExclamation, remove, free, your.
+       
+
+Pour les splits de substitution, en tête de liste de la partie surrogate, la variable ayant la concordance la plus forte avec la variable active du noeud est num000.
+Suivi de money, internet, capitalLong et credit.
+
+
+
+## 2.3] Explication split compétitif et split de substitution
+
+En classification, on cherche à diminuer la fonction de pureté de Gini, et donc à augmenter l’homogénéité des nœuds obtenus.
+
+Le split competitifs, nous donne la variable qui à la valeur de l’indice de Gini le plus élevé. Spliter avec la première variable qui est donnée par split competitifs nous permet de réduire de manière importante l’hétérégénéité. 
+
+Cette première variable fait office ici de la variable qui réduit le plus l’hétérogénéité lors du split.
+
+Dans Surrogate splits, si on n’arrive pas à avoir accès à la variable charExcamation, on va le remplacer par la première variable de surrogate splits.
+Pour l'arbre stump (de profondeur 1) se sera la variable num000.
+
+
+## 2.4] Construction d'un arbre maximal
+On construit l'arbre maximal Tmax qui est un arbre pleinement développé grâce à la commande minsplit et cp.
+
+la commande minsplit permet d'indiquer le nombre minimum d’individus présents à l’étape d’un nœud pour envisager une coupure.
+
+```{r}
+{tmax <- rpart(type ~ ., data = spam.app, control = rpart.control(minsplit = 1,
+cp = 0))
+plot(tmax)
+text(tmax, cex = 0.5)
+}
+```
+
+    L’arbre maximal a tendance à possèder une très grande variance et un biais faible. En visualisant sur le graphique, on constate qu'il peut être difficilement interprétable lorsqu'on a un grand nombre de feuille. 
+    
+    On peut améliorer légerement la visualisation avec la librairie library(rpart.plot) (ci-dessous). 
+
+```{r}
+{
+library(rpart.plot)
+prp(tmax,extra=1)
+}
+```
+
+On va maintenant dessiner les erreurs de validation croisée de la suite de Breiman des sous-arbres élagués de l’arbre maximal.
+
+```{r}
+plotcp(tmax)
+```
+
+    Le graphique ci-dessus nous montre la suite optimale des sous-arbres élagués Tmax obtenue par la construction de l’arbre
+    maximal et l’application de l’algorithme d’élagage.
+
+    la méthode consiste de trouver l’arbre optimal parmi les admissibles entre Tmax (le modèle de complexité maximale), qui conduit au         surajustement aux données de l’échantillon d’apprentissage et l’arbre restreint à la racine qui est fortement biaisé. En nombre fini,      on construit donc la suite de tous les meilleurs arbres à k feuilles, dans notre cas sur l'axe des abscise on a k=1 à 158 environ (la      valeur la plus grande qui est visible sur le graphique est 158) pour 1 =< k =< |Tmax| . On remarque que l'arbre maximal a une              complexité nulle (cp = 0).
+
+    Chaque point représente ainsi un arbre, avec l’estimation de l’écart-type de l’erreur de validation croisée sous forme de segment          vertical.Pour choisir le bon niveau de simplification, ou encore le bon nombre de feuilles, on procède par validation croisée. La          fonction rpart réalise par défaut une estimation des performances de l'arbre par validation croisée à 10 blocs pour chaque niveau         de simplification pertinent. L'axe des abscisses indique la complexité de l'arbre par l'intermédiaire du nombre de feuilles. La        ligne pointillée est calculée avec la règle dite du "1−SE" (règle de l’écart type, Breiman et al, 1984).
+
+
+
+*Interprétation :*
+      
+    On constate qu'en analysant le cp (paramètre de complexité, ou encore critère de pénalité),  les performances s'améliorent dans un         premier temps quand on augmente le nombre de feuilles puis se dégradent en raison du sur-apprentissage.
+
+    l’erreur moyenne par validation croisée diminue jusqu'à une certaine valeur cp (visuellement sur le graphique: 0.0012 environ) puis augmente. Visuellement on peut dire que l'arbre minimisant le critère posséde entre 40 et 85 feuilles.
+
+On choisit en général la complexité qui minimise l'erreur estimée. On peut observer les résultats sur le tableau ci-dessous.
+
+
+
+```{r}
+printcp(tmax)
+```
+
+    C’est à partir de la table cp que nous allons déterminer notre arbre optimal. C’est à dire celui qui minimise l’erreur xerror obtenu par validation croisée.
+    On se base sur la colonne xerror, dans notre cas la valeur minimal est : 0.18543  (ligne 18 du tableau) donc le cp optimal est 0.00110375. Après avoir distingué visuelement sur la table cp, on peut vérifier et obtenir cette valeur avec la commande ci-dessous.
+
+```{r}
+tmax$cptable[which.min(tmax$cptable[, 4]), 1]
+```
+Cette étape de l’algorithme CART, s’appelle l’élagage et consiste à chercher le
+meilleur sous-arbre élagué de l’arbre maximal (meilleur au sens de l’erreur de généralisation). On va utiliser la commande "prune".
+
+```{r}
+tprune <- prune(tmax, cp = tmax$cptable[which.min(tmax$cptable[, 4]), 1])
+plot(tprune)
+text(tprune, cex = 0.8)
+```
+    
+    On a le meilleur sous arbre élagué de l’arbre maximal, l'arbre reste toujours difficile à interpreté car il a une profondeur assez elevée.  
+    
+    
+## 2.5] Regle du 1-se 
+
+On applique la règle de l’écart type (“1-SE”) pour choisir un cp inférieur mais aussi l’arbre le plus petit. 
+
+```{r}
+# regle 1-se
+#min(tmax$cptable[, "xerror"]) + (1*tmax$cptable[ which.min(tmax$cptable[, "xerror"]), "xstd"])
+```
+
+```{r}
+#commande equivalent à la précédente 
+#sum(tmax$cptable[ which.min(tmax$cptable[, 4]), 4:5])
+```
+
+
+```{r}
+# 1-se
+se = min(tmax$cptable[, "xerror"]) + (1*tmax$cptable[ which.min(tmax$cptable[, "xerror"]), "xstd"])
+tmax$cptable
+```
+
+
+
+```{r}
+#la valeur du 1-se 
+se
+```
+
+
+
+```{r}
+#selection du plus petit arbre 
+tmax$cptable[tmax$cptable[,"xerror"]<se , "xerror"]
+```
+
+L’arbre minimal avec l’erreur la plus petite est atteint avec un cp de 0.001655629 (ligne 16 de la table cp) et avec une taille de 33 noeuds.
+.*
+```{r}
+tprune_1sd  = prune(tmax, cp=0.001655629)
+
+plot(tprune_1sd)
+text(tprune_1sd, cex = 0.8)
+```
+## 2.6] Comparaison des arbres
+
+Le meilleur sous-arbre élagué de l’arbre maximal (à un écart-type près) comporte plus de feuilles, de noeuds et de variable que l'arbre par défaut.
+
+```{r}
+identical(t_def, tprune_1sd)
+identical(tprune, tprune_1sd)
+```
+
+
+
+    On observe que nos arbres ne sont pas identiques : 
+    - Pour l'arbre par defaut et prune
+    - Pour l'arbre prune et prune 1_sd
+
+    Le meilleur sous-arbre élagué de l’arbre maximal (à un écart-type près) comporte plus de feuilles, de noeuds et de variable que l'arbre par défaut
+
+    Les arbres prune et tprune_1sd ne sont pas identiques, en effet car ils n'ont pas le même nombre de feuille. Le meilleur sous-arbre élagué de l’arbre maximal à un écart-type près (tprune_1sd) a moins de feuille que le tprune.
+
+
+```{r}
+{
+predstump <- predict(tstump, spam.test, type="class")
+errstump <- round(sum(predstump!=spam.test$type)/nrow(spam.test), 3) *100
+appstump <- round(sum(predict(tstump, spam.app, type="class")!=spam.app$type)/nrow(spam.app), 3) * 100
+cat("Pour une seule profondeur \n")
+cat("erreur d'apprentissage est de", appstump, "%" )
+cat("\n erreur de test est de", errstump, "%" )
+
+predmax <- predict(tmax, spam.test, type="class")
+errmax <- round(sum(predmax!=spam.test$type)/nrow(spam.test), 3) * 100
+appmax <- round(sum(predict(tmax, spam.app, type="class")!=spam.app$type)/nrow(spam.app), 3) * 100
+cat("\n \n Pour l'arbre maximal \n")
+cat("L'erreur d'apprentissage est de", appmax, "%")
+cat("\n L'erreur de test est de", errmax, "%")
+
+predprune <- predict(tprune, spam.test, type="class")
+errprune <- round(sum(predprune!=spam.test$type)/nrow(spam.test), 3) *100
+appprune <- round(sum(predict(tprune, spam.app, type="class")!=spam.app$type)/nrow(spam.app), 3) * 100
+cat("\n \n Pour l'arbre prune \n")
+cat("L'erreur d'apprentissage est de", appprune, "%")
+cat("\n L'erreur de test est de", errprune, "%")
+
+
+preddef<- predict(t_def, spam.test, type="class")
+errtdef <- round(sum(preddef!=spam.test$type)/nrow(spam.test), 3) * 100
+apptdef <- round(sum(predict(t_def, spam.app, type="class")!=spam.app$type)/nrow(spam.app), 3) * 100
+cat("\n \n Pour l'arbre par defaut \n ")
+cat("L'erreur d'apprentissage est de", apptdef, "%")
+cat("\n L'erreur de test est de", errtdef, "%")
+
+
+
+
+predprune_1sd<- predict(tprune_1sd, spam.test, type="class")
+errtprune_1sd <- round(sum(predprune_1sd!=spam.test$type)/nrow(spam.test), 3) * 100
+apptprune_1sd <- round(sum(predict(tprune_1sd, spam.app, type="class")!=spam.app$type)/nrow(spam.app), 3) * 100
+cat("\n \n  la règle du 1 SE \n ")
+cat("L'erreur d'apprentissage est de", apptprune_1sd, "%")
+cat("\n L'erreur de test est de", errtprune_1sd, "%")
+}
+```
+On remarque que l’arbre maximal (trop complexe) a une erreur empirique (i.e. sur l’échantillon d’apprentissage) quasiment nulle et que l’arbre à une profondeur (trop simple) présente des erreurs test et empirique elevé et proches. L’arbre optimal prune, quant à lui, a la meilleure erreur test qui est de 8,9%.
+
+
+# 3] OZONE 
+
+## 3.1]Description du dataset et nettoyage de données
+```{r}
+library(mlbench)
+data(Ozone)
+?Ozone
+```
+
+    Description : Le jeux de données est "Los Angeles ozone pollution data, 1976". Il s'agit d'une base de données avec 366 observations sur 13 variables, chaque observation correspond à un jour. Le but s'agit de prédire la valeur maximale quotidienne de la moyenne horaire de l'ozone.
+    
+    Format :Month: 1 = January, ..., 12 = December
+            2 Jour du mois
+            3 Day of week: 1 = Monday, ..., 7 = Sunday
+            4 Daily maximum one-hour-average ozone reading
+            5 500 millibar pressure height (m) measured at Vandenberg AFB
+            6 Wind speed (mph) at Los Angeles International Airport (LAX)
+            7 Humidity (%) at LAX
+            8 Temperature (degrees F) measured at Sandburg, CA
+            9 Temperature (degrees F) measured at El Monte, CA
+            10Inversion base height (feet) at LAX
+            11Pressure gradient (mm Hg) from LAX to Daggett, CA
+            12Inversion base temperature (degrees F) at LAX
+            13Visibility (miles) measured at LAX
+    
+    Source : Leo Breiman, Department of Statistics, UC Berkeley. Data used in Leo Breiman and Jerome H. Friedman (1985), Estimating optimal transformations for multiple regression and correlation, JASA, 80, pp. 580-598.
+
+
+```{r}
+str(Ozone)
+```
+Dans notre base de données on observe qu'on a 10 variables numériques et 3 variables non numérique (V1,V2,V3). Le fait qu'on ait des variables numériques et non numériques ne posera pas problème du fait que les arbres prennent en compte les modalités. 
+
+Il est important de connaitre le pourcentage de valeur manquante pour chaque variable,
+
+
+```{r}
+{
+library(VIM)
+aggr_plot <- aggr(Ozone, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE, labels=names(Ozone), cex.axis=.7, gap=3, ylab=c("Histogram of missing data","Pattern"))
+
+library(funModeling)
+df_status(Ozone)
+
+}
+```
+        
+    Le graphique nous aide à comprendre que plus de 55% des échantillons ne manquent d'aucune information. On a 34% des échantillons qui manquent uniquement la valeur V9 qui correspond à la temperature (degrée F) mesuré à El Monte, CA. On remarque que le pourcentage de valeur manquante est assez importante (p_na) pour la variable V9 qui est de 37.98%. La température est absente durant 139 jours sur une année.On serait tenté de supprimer la variable V9.
+
+
+    V1,V2,V3,V6 et V13 sont des variables non manquantes dans notre base de données.
+    
+    La variable cible V4 est manquante dans notre base de données mais seulement de 1,37%, ce qui est très peu. On va utiliser la méthode "impute_cart". L'imputation CART par "impute_cart" peut être utilisée pour des données numériques, catégorielles ou mixtes. Les valeurs manquantes sont estimées à l'aide d'un arbre de classification et de régression tel que spécifié par Breiman, Friedman et Olshen (1984). 
+
+
+La variable V8 et V9 sont tous les deux des températures, il serait intéressant d'observer la relation linéaire entre ses deux variables.
+```{r}
+#relation linéaire entre la variable V9 et V8
+plot(Ozone[,9], Ozone[,8])
+```
+Visuellement, on peut observer qu'il y a une corrélation linéaire positive assez importante entre la variable V9 et V8, on peut donc supprimer la variable V9 et garder la variable V8.
+
+
+
+```{r}
+Ozone[,2]
+```
+La variable V2	Day of month (nombre de jours dans le mois). Il s'agit d'une données contenant une grande quantité d'informations supplémentaires sans signification à notre problème. Les données bruyantes peuvent affecter négativement les résultats de toute analyse de données et fausser les conclusions si elles ne sont pas gérées correctement.On va donc supprimer cette variable.
+
+
+
+```{r}
+#Suppression de la variable V9 et V2
+Ozone<-Ozone[,-9]
+Ozone<-Ozone[,-2]
+head(Ozone)
+```
+
+## 3.2] Imputation valeur manquante
+
+```{r}
+Ozone$V4
+```
+
+
+Nous imputons les valeurs manquantes de la variable cible V4 à l'aide d'un modèle d'arbre de décision. Toutes les variables à l'exception de V4 sont utilisées comme prédicteur.
+
+```{r}
+library(simputation)
+Ozone_bis <- impute_cart(Ozone, V4 ~ .)
+```
+
+On s'intéresse maintenant aux prédicteurs en faisant une boite à moustache.
+
+```{r}
+#Boxplot de chaque variable
+par(mfrow=c(1,5))
+for(i in 3:11) {
+boxplot(Ozone_bis[,i], main=names(Ozone_bis)[i])
+}
+```
+Le principal inconvénient de l'arbre CART est le manque de stabilité. Le modèle est sensible aux variations (même assez faible). Il est donc important de distinguer les valeurs aberantes et de les supprimer. Sur les boxplot, on observe qu'on a des valeurs aberrantes pour les variables V4 (variable cible), V5, V6 et V13.
+
+```{r}
+Ozone_bis_2 <- Ozone_bis
+
+#suppression valeur aberrante V4
+outliersv4 <- boxplot(Ozone_bis_2$V4, plot=FALSE)$out
+x4<-Ozone_bis_2
+x4<- x4[-which(x4$V4 %in% outliersv4),]
+
+#suppresion valeur aberrante V5
+outliersV5 <- boxplot(Ozone_bis_2$V5, plot=FALSE)$out
+x5<-x4
+x5<- x5[-which(x5$V5 %in% outliersV5),]
+
+#supression valeur aberrante V6
+outliersV6 <- boxplot(Ozone_bis_2$V6, plot=FALSE)$out
+x6<-x5
+x6<- x6[-which(x6$V6 %in% outliersV6),]
+
+#suppresion valeur aberrante V13 
+outliersV13 <- boxplot(Ozone_bis_2$V13, plot=FALSE)$out
+Ozone_finale<-x6
+Ozone_finale <- Ozone_finale[-which(Ozone_finale$V13 %in% outliersV13),]
+Ozone_finale 
+
+```
+
+    En tout, on a supprimé 366 - 324 = 42 observations dans notre base de données. On peut vérifier en affichant les boxplot ci-dessous que les valeurs aberrantes ne sont plus présents
+```{r}
+#Boxplot de chaque variable
+par(mfrow=c(1,5))
+for(i in 3:11) {
+boxplot(Ozone_finale[,i], main=names(Ozone_finale)[i])
+}
+```
+# 3.3] Performances de modèle
+On sépare les jeux de données avec 70% d'entrainement et 30% test.
+
+```{r}
+library(caTools)
+set.seed(32)
+split = sample.split(Ozone_finale$V4, SplitRatio = 0.7)
+Ozone.app = subset(Ozone_finale, split == T)
+Ozone.test = subset(Ozone_finale, split ==F)
+```
+
+
+```{r}
+plot(density(Ozone.app$V4), type="l", col='blue')
+lines(density(Ozone.test$V4), type="l", col='red')
+legend("topright", inset=.02, title="Distribution de V4",
+   c("apprentissage","test"), fill=c("blue","red"), horiz=TRUE, cex=0.8)
+```
+On se rend compte que la distribution de notre variable cible (V4) de l'entrainement et du test sont quasiment similaires. 
+
+```{r}
+library(rpart)
+#Construction de l'arbre par defaut
+
+z_def=rpart(V4 ~ .,data = Ozone.app)
+plot(z_def)
+text(z_def, cex = 0.5)
+```
+
+    - On obtient un arbre de classification  de type CART qui est interprétable.
+    
+    -On observe qu'avec les paramètres par défaut, l'arbre comporte 9 noeuds internes et 10 feuilles , les splits sont basés sur 6 variables : V8, V10, V1, V12, V11, V3.
+    
+    -Sur l'arbre on peut observer que V8 est la meilleur variable qui split au mieux les données.
+
+On contruit maintenant l'arbre maximale
+
+```{r}
+
+#Construction de l'arbre maximale 
+{
+tmaxOzone <- rpart(V4 ~ ., data = Ozone.app, control = rpart.control(minsplit = 2,cp = 0))
+plot(tmaxOzone)
+text(tmaxOzone, cex = 0.5)
+}
+```
+   
+    -on a un rabre difficilemnt interprétable.
+    -V8 est la 1ère variable qui split au mieux les données comme l'arbre par défaut
+
+```{r}
+#arbre optimal
+zprune <- prune(tmaxOzone, cp = tmax$cptable[which.min(tmax$cptable[, 4]), 1])
+plot(zprune)
+text(zprune, cex = 0.8)
+```
+
+    - On a réduit la profondeur de l'abre en prenant l'arbre optimal, comparé à l'arbre maximal.
+    - L'intérprétation est un peu plus facile comparé à l'arbre maximal.
+    - V8 est toujours la variable qui split en 1er les données.
+
+```{r}
+#La régle du 1-SE
+z_thres1SE <- sum(tmaxOzone$cptable[ which.min(tmaxOzone$cptable[, 4]), 4:5])
+z_cp1SE <- tmaxOzone$cptable[ min(which(tmaxOzone$cptable[, 4] <= z_thres1SE)), 1]
+zprune_1sd <- prune(tmaxOzone, cp = z_cp1SE)
+plot(zprune_1sd)
+text(zprune_1sd, cex = 0.8)
+```
+
+
+
+
+# 3.4] Comparaison des résultats
+
+```{r}
+library(Metrics)
+
+#arbre par defaut
+predz_def<-predict(z_def, Ozone.test)
+errz_def <- sqrt(mse(Ozone.test$V4,predz_def))  
+appz_def = sqrt(mse(Ozone.app$V4,predict(z_def,Ozone.app))) 
+cat("\n \n  Pour l'arbre par defaut \n ")
+cat("Erreur test de l'arbre par defaut:",errz_def,"\n")
+cat("Erreur apprentissage de l'abre par defaut :",appz_def,"\n\n")
+
+
+#arbre maximal
+predmaxOzone<-predict(tmaxOzone, Ozone.test)
+errmaxOzone <- sqrt(mse(Ozone.test$V4,predmaxOzone))  
+appmaxOzone = sqrt(mse(Ozone.app$V4,predict(tmaxOzone,Ozone.app)))  
+cat("\n \n  Pour l'arbre maximal \n ")
+cat("Erreur de test est de:",errmaxOzone,"\n")
+cat("Erreur d'apprentissage est de:",appmaxOzone,"\n\n")
+
+#arbre optimal
+predprune_oz<-predict(zprune, Ozone.test)
+errpruneozone <- sqrt(mse(Ozone.test$V4,predprune_oz))  
+apppruneozone = sqrt(mse(Ozone.app$V4,predict(zprune,Ozone.app)))  
+cat("\n \n  Pour l'arbre optimal \n ")
+cat("Erreur de test est de :",errpruneozone,"\n")
+cat("Erreur d'apprentissage est de :",apppruneozone,"\n")
+
+#La régle du "1−SE"
+predseOzone<-predict(zprune_1sd, Ozone.test)
+errseOzone <- sqrt(mse(Ozone.test$V4,predseOzone))  
+appseOzone = sqrt(mse(Ozone.app$V4,predict(zprune_1sd,Ozone.app)))  
+cat("\n \n  la règle du 1 SE \n ")
+cat("Erreur de test est de :",errseOzone,"\n")
+cat("Erreur d'apprentissage est de :",appseOzone,"\n")
+
+```
+      
+      L'arbre qui nous donne de meilleur performance sur les données test est l'abre optimal avec la règle du 1-SE.L'avantage est que cet arbre est facile à interpréter avec 9 noeuds internes et 10 feuilles. L'erreur de test avec la régle du 1-SE est moins elevé que l'abre optimal  (prune), on se rend compte qu'en prenant l'arbre optimal, on aura pas forcement l'erreur la moins elevée sur de nouveau jeux de données. L'avantage est que le modèle sur-apprend moins avec la régle du 1-se comparé à l'abre optimal lorsqu'on observe l'erreur d'apprentissage.
+      
+On affiche les variables les plus importantes de notre arbre qui nous donnée la meilleure performance (arbre optimal avec la régle du 1-SE)
+
+```{r}
+zprune_1sd$variable.importance
+```
+    
+    -On observe que les 2 premieres variables les plus importantes sont liées la température (V8: Température mesuré à SandBurg,CA et V12 : Température de base de l'inversion à LAX ).
+    
+    -On observe sur les arbres que le 1er split compétitif s'agit de la variable V8.
+    
+    
+# 3.5] Bonus : interprétation sur l'importance des variables du modèle CART
+
+Il peut être intéressant de s'intéresser en particulier à la variable V8 et d'observer pourquoi cette variable est si importante dans notre modèle. Pour cela je décide d'afficher le graphique de dépendance partielle qui a pour objectif de montrer l’effet marginal
+de cette variable explicative sur la prédiction faite par notre modèle. Ce graphique peut montrer si la relation entre la cible et une caractéristique est linéaire, monotone ou plus complexe.
+```{r}
+library(pdp)
+partial(zprune_1sd, pred.var = "V8",  plot = TRUE, rug = TRUE)
+```
+      
+    On observe que la température (degrées F) mesuré à Standburg, CA (V8) a une réelle influence sur la variable cible lorsqu'il atteint une valeur plus grand que 69.5 (valeur du seuil sur l'arbre), la courbe augmente brusquement. Dans ce cas, la valeur de la variable cible sera élevé. Avant cela on observe que la courbe est monotone, à ce moment là, la température n'a pas de gros impact sur la valeur maximale quotidienne de la moyenne horaire de l'ozone (V4).
+
+On peut aussi s'intéresser à la variable V8, qui est la deuxième variable la plus importante de notre modèle
+```{r}
+partial(zprune_1sd, pred.var = "V12",  plot = TRUE, rug = TRUE)
+```
+      
+    On observe une courbe avec une croissance moins brusque que la variable V8. Cette variable a une influence sur la variable cible à plusieurs niveaux selon la valeur de l'inversion de la température de base (degrees F) à LAX. On observe des sauts assez brusque sur le graphique.
+      
+      
+      
+## 4]  Les forêts aleatoires
+
+
+
+On charge la lirairie random forest : Il s'agit d'une librairie de classification et régression basée sur une forêt d'arbres utilisant des entrées aléatoires, basée sur Breiman (2001) 
+
+## 4.1] Bagging
+
+On applique la méthode du Bagging qui a été introduite par Breiman (1996)
+
+
+```{r}
+library(randomForest)
+```
+
+
+```{r}
+## ----bag-----------------------------------------------------------------
+
+bag <- randomForest(type ~ ., data = spam.app, mtry = p)
+bag
+```
+En sortie on a le classificateur, le nombre d'arbres (500), les variables à chaque division (57), une matrice de confusion et une estimation OOB du taux d'erreur. 
+
+
+    Matrice de confusion : Sur la matrice de confusion on trouve sur sa diagonale (1325 et 807) le nombre d’individus bien classé. Les autres valeurs (99 et 69) correspondent aux individus mal classés par l’algorithme. Le pourcentage de mal classé non spam est très faible pour les non spam et un peu plus elevée pour spam. On voit clairement que les non spams sont mieux reconnus par l’algorithme avec 4 % d’erreurs alors qu’il y a 10 % de taux de mal classés pour les spam.
+    
+  
+    OBB : L’out of bag error est une mesure de l’erreur de prédiction de Random Forest. Cette estimation est calculée en comptant le nombre de points de l'ensemble d'entraînement qui ont été mal classés (69 observations de non spam et 99 spam) et en divisant ce nombre par le nombre total d'observations ((69+99)/2300 ~= 7,3%). Chaque arbre de la forêt est construit sur une fraction (“in bag”) des données (c’est la fraction qui sert à l’entraînement de l’algorithme. Alors pour chacun des individus de la fraction restante (“out of bag”) l’arbre peut prédire une classe. Grâce à cette valeur on pourrait se dire q'on pourrait avoir une idée du taux d'erreur en estimant sur de nouveaux jeux de données test, mais il faut bien noter que pour chaque observation ce n’est pas le même ensemble d’arbres qui est agrégé. En conséquence, cette erreur estime l’erreur de généralisation d’une forêt, mais elle n’utilise jamais les prédictions de la forêt elle-même, mais plutôt celles de prédicteurs qui sont desagrégations d’arbres de cette forêt. Par la suite, nous adopterons ici quasi exclusivement l’erreur OOB puisqu’elle est très liée à la définition de l’importance des variables et que nous l’utiliserons pour comparer des prédicteurs entre eux, et non pour obtenir une estimation précise de leurs erreurs de généralisation.
+    
+```{r}
+predbag <- predict(bag, spam.test)
+errbag <- round(sum(predbag != spam.test$type)/nrow(spam.test), 3) * 100
+cat("L'erreur obtenu sur la base de test est de", errbag, "%")
+cat("\n l'erreur obtenu sur la base d'apprentissage est de", round(sum(predict(bag, spam.app) != spam.app$type)/nrow(spam.app), 3) * 100, "%")
+```
+
+
+    On remarque que l'erreur obtenu avec le bagging est bas comparé aux autres modèles avec un seul arbre : arbre une profondeur, arbre prune, arbre prune 1-SE et l'arbre par défaut. En appliquant la règle de base ( un arbre CART) sur différents échantillons bootstrap, on en modifie les prédictions, et donc on construit ainsi une collection variée de prédicteurs. L’étape d’agrégation permet alors d’obtenir un prédicteur performant.
+    
+    L'erreur obtenu sur la base de données test (6.8%) est inférieur au taux d'erreur OOB (7.3%)
+    
+    Le taux d'erreur le moins elevé obtenu sur un seul arbre est l'arbre prune (8.9%). Avec le bagging on a réduit le taux d'erreur de 8.9-6.8 = 2.1%, ce qui n'est pas négligeable.
+    
+    Avec le bagging, on une stabilité sur l'erreur. on a une erreur d'environ 0% pour l'apprentissage, en réalité même si on a une erreur d'apprentissage proche de 0, on a des études de recherche récentes qui montrent que en réalité le modèle ne surapprend pas.
+    
+    
+## 4.2] Random Forest par defaut 
+    
+```{r}
+rf <- randomForest(type ~ ., spam.app, importance = TRUE)
+rf
+```
+
+En sortie on a le classificateur, le nombre d'arbres (500), les variables à chaque division (7), une matrice de confusion et une estimation OOB du taux d'erreur.
+
+    Matrice de confusion : On observe qu'avec Random Forest, on a des taux d'erreur de spam et non spam inférieur au bagging. On observe toujours  que les non spams sont mieux reconnus par l’algorithme avec 3.4 % d’erreurs alors qu’il y a 9.1 % de taux de mal classés pour les spam.Sur la matrice de confusion on trouve sur sa diagonale (1346 et 823) le nombre d’individus bien classé. Les autres valeurs (83 et 48) correspondent aux individus mal classés par l’algorithme.
+    
+     L’out of bag error obtenu (5.7%) est inférieur à celui du bagging (7.3%).
+     
+On va maintenant calculer l'erreur sur notre jeux de données test et apprentissage.
+
+```{r}
+## ----rf_err--------------------------------------------------------------
+
+predrf <- predict(rf, spam.test)
+predrf.app<- predict(rf, spam.app)
+errrf.app <- round(sum(predrf.app != spam.app$type)/nrow(spam.app), 3) * 100
+errrf <- round(sum(predrf != spam.test$type)/nrow(spam.test), 3) * 100
+cat("Pour Random Forest par défaut ")
+cat("\n L'erreur obtenue sur la base de test est de", errrf, "%")
+cat("\n L'erreur obtenue sur la base d'apprentissage est de", errrf.app, "%")
+```
+    
+    On observe que pour les données test, le taux d'erreur de random forest par defaut (4.6%) est inférieur à celui du bagging (6.8%). Pour les données d'apprentissage, l'erreur de random forest (0.4%) est supérieur à celui du bagging (0%)
+    
+    Jusqu'à maintenant random forest fait parti du modèle le plus performant.
+
+On va maintenant étudier l’évolution de l’erreur OOB en fonction ntree en utilisant do.trace de random forest 
+```{r}
+{
+rf <- randomForest(type ~ ., data = spam.app, ntree = 1000, do.trace = 100)
+plot(rf)
+}
+```
+
+On a sur le graphique :
+- En rouge l'erreur de la classe 1 (non spam)
+- En vert l'erreur de la classe 2 (spam)
+- En noir l'erreur OBB (taux de classification global)
+
+Graphiquemennt, on observe que les erreurs ont tendance à se stabiliser. Pour gagner en temps de calcul il n'est pas nécessaire d'aller plus loin sur le nombre d'arbre qu'on doit construire. On peut par exemple s'arréter à partir de 500 feuille qui est la valeur par défaut pour le nombre d'arbre pour random forest ou 200 qui est le taux d'erreur OOB minimal d'après notre tableau.
+
+
+# 4.3] Importance des variables
+
+### 4.3.1] Random Forest par defaut 
+
+```{r}
+rf <- randomForest(type ~ ., data = spam.app, importance = TRUE)
+varImpPlot(rf)
+```
+
+
+    MeanDecreaseAccuracy : Donne une estimation approximative de la perte de performance de prédiction lorsque cette variable particulière est omise de l'ensemble de formation. Prenons pour exemple la variable charExclamation,si on permute aléatoirement cette variable (c'est-à-dire si une observation qui a un mail qui contient peu de $ et de !, a peu de chance d'être un spam, si on attirbue aléatoirement ses symboles (si elle est présente dans notre échantillon en sac), l'accuracy augmentera de 40 en moyenne. Ce qui est logique car plus on a des ponctuations ou autres plus le la présence de spam est importante. Cette variable peut être considéré comme importante.
+    
+    MeanDecreaseGini : GINI est une mesure de l'impureté des nœuds. on y pense de la manière suivante : si on utilise cette fonction pour diviser les données, quelle sera la pureté des nœuds ? La pureté la plus élevée signifie que chaque nœud ne contient que des éléments d'une seule classe. L'évaluation de la diminution de GINI lorsque cette caractéristique est omise permet de comprendre l'importance de cette caractéristique pour diviser les données correctement. CharExclamation est la variable qui a le GINI la plus elevé.
+    
+On affiche ci-dessous les top variables les plus importantes
+
+```{r}
+rfimp <- rf$importance[, nlev + 1]
+rfimpsort <- sort(rfimp, decreasing = TRUE, index.return = TRUE)
+cat("Les 8 variables les plus importantes sont : \n")
+colnames(spam.app[rfimpsort$ix[1:8]])
+```
+Remove est la variable la plus importante. Les variables les plus importants sont ceux qui ont un impact sur la valeur prédictive dans notre modèle. 
+
+```{r}
+nlev <- nlevels(spam.app$type)
+barplot(sort(rf$importance[, nlev + 1], decreasing = TRUE, index.return = TRUE)$x)
+```
+Sur le grahique, en affichant l'ensemble des variables on observe qu'il y en a qu'il y a des variables comme num415 qui ont de trés faible importance pour le modèle, ses variables n"ont pas de gros impact sur la valeur prédictive comme remove, free ... qui sont très importantes.
+
+
+### 4.3.2] Random Forest de Stump
+
+On se préocupe maintenant de random forest de stump
+```{r}
+rfstump <- randomForest(type~., spam.app, maxnodes=2, importance=TRUE)
+rfstumpimpsort <- sort(rfstump$importance[, nlev+1], decreasing=TRUE,
+index.return=TRUE)
+barplot(rfstumpimpsort$x)
+```
+
+
+```{r}
+rfimpstump <- rfstump$importance[, nlev + 1]
+rfimpstumpsort <- sort(rfimpstump, decreasing = TRUE, index.return = TRUE)
+cat("Les 8 variables les plus importantes sont : \n")
+colnames(spam.app[rfimpstumpsort$ix[1:8]])
+```
+On ne retouve pas les mêmes importances de variable que le random forest par defaut. L'ordre de l'importance des variables n'est pas aussi la même. charExclamation est cette fois-ci la variable la plus importante.
+```{r}
+varImpPlot(rfstump)
+```
+
+
+
+# 4.4] Illustration de l’influence du paramètre mtry sur l’erreur OOB ainsi que sur la VI
+
+On peut améliorer la prédiction de Random Forest par rapport au paramètre mtry. 
+mtry : le nombre de variables testées à chaque division
+
+
+
+### 4.4.1] Pour mtry=p et maxnode 2
+```{r}
+bagstump <- randomForest(type~., spam.app, maxnodes=2, mtry=p, importance=TRUE)
+bagstumpimpsort <- sort(bagstump$importance[, nlev+1], decreasing=TRUE,
+index.return=TRUE)
+barplot(bagstumpimpsort$x)
+```
+
+
+```{r}
+colnames(spam.app[bagstumpimpsort$ix[1:8]])
+```
+    
+    En comparant avec le Random Forest de Stumps(mtry = p^(1/2)) et le bagging stump (mtry=p), on se rend compte qu'on a pas tout à fais les mêmes variables d'importance dans les modèles. Parmis les 8 variables, les seuls variables importantes qu'ils ont en commun sont : charDollar et charExclamation.
+    
+On compare l’erreur OOB des deux modèles en se basant avec celui qui contient tous les arbres.
+```{r}
+{
+cat("On a une erreur d'OOB de", tail(bagstump$err.rate[, 1], 1) *100, "% pour le bagging stump (mtry=p) \n")
+cat("On a une erreur d'OOB de", tail(rfstump$err.rate[, 1], 1)  *100, "% pour le Random Forest stump (mtry= p^(1/2))")
+}
+```
+On se rend compte que pour une valeur de mtry elevé (mtry=p), le taux d'erreur est plus important que la valeur par défaut. Il est donc préférable de ne pas tester le nombre maximum de variable à chaque division. On l'a traité avec un maxnodes=2. On a des taux d'erreurs assez elevée, il serait intéressant maintenant de traiter avec la valeur de maxnodes par défaut
+
+
+### 4.4.2] Pour mtry = 1
+
+```{r}
+f1 <- randomForest(type~., spam.app, mtry=1, importance=TRUE)
+tail(rf1$err.rate[, 1], 1)
+
+rf1impsort <- sort(rf1$importance[, nlev+1], decreasing=TRUE, index.return=TRUE)
+barplot(rf1impsort$x)
+```
+
+```{r}
+colnames(spam.app[rf1impsort$ix[1:8]])
+```
+  
+    En comparant avec les modèles précédentes on retrouve quelques variables en commun qui ressortent commun comme charExclamation, charDollar...
+    
+```{r}
+{
+cat("On a une erreur d'OOB de", tail(f1$err.rate[, 1], 1) *100, "% pour random forest avec 1 seule variable testé à chaque division (mtry=1) \n")
+cat("On a une erreur d'OOB de", tail(bagstump$err.rate[, 1], 1) *100, "% pour le bagging stump (mtry=p) \n")
+cat("On a une erreur d'OOB de", tail(rfstump$err.rate[, 1], 1)  *100, "% pour le Random Forest stump (mtry= p^(1/2))")
+}
+```
+Le taux d'erreur d'OOB est plus bas pour un mtry=1 et un maxnode par defaut, comparé aux deux autres modèles. Il serait intéressant d'augmenter la valeur de mtry en laissant le maxnode par defaut.
+
+### 4.4.3] Pour mtry = p/3 
+
+
+```{r}
+rfpsur3 <- randomForest(type~., spam.app, mtry=p/3, importance=TRUE)
+
+```
+
+```{r}
+rfpsur3impsort <- sort(rfpsur3$importance[, nlev+1], decreasing=TRUE,
+index.return=TRUE)
+barplot(rfpsur3impsort$x)
+```
+
+
+```{r}
+colnames(spam.app[rfpsur3impsort$ix[1:8]])
+```
+```{r}
+{
+cat("On a une erreur d'OOB de", tail(rfpsur3$err.rate[, 1], 1) *100, "% pour le Random Forest (mtry=p/3) \n")
+cat("On a une erreur d'OOB de", tail(f1$err.rate[, 1], 1) *100, "% pour random forest avec 1 seule variable testé à chaque division (mtry=1) \n")
+cat("On a une erreur d'OOB de", tail(bagstump$err.rate[, 1], 1) *100, "% pour le bagging stump (mtry=p) et maxnode=2 \n")
+cat("On a une erreur d'OOB de", tail(rfstump$err.rate[, 1], 1)  *100, "% pour le Random Forest stump (mtry= p^(1/2)) et maxnode=2")
+}
+```
+
+Le taux d'erreur d'OOB a encore diminué avec un modèle mtry=P/3 et maxnodes par défaut. 
+
+### 4.4.4]mtry =p et maxnode par defaut
+
+```{r}
+rfp <- randomForest(type~., spam.app, mtry=p, importance=TRUE)
+```
+
+```{r}
+{rfpimpsort <- sort(rfp$importance[,nlev+1], decreasing=TRUE, index.return=TRUE)
+barplot(rfpimpsort$x)
+}
+```
+
+
+
+```{r}
+colnames(spam.app[rfpimpsort$ix[1:8]])
+```
+
+```{r}
+{
+cat("On a une erreur d'OOB de", tail(rfp$err.rate[, 1], 1) *100, "% pour le Random Forest (mtry=p) \n")
+cat("On a une erreur d'OOB de", tail(rfpsur3$err.rate[, 1], 1) *100, "% pour le Random Forest (mtry=p/3) \n")
+cat("On a une erreur d'OOB de", tail(f1$err.rate[, 1], 1) *100, "% pour random forest avec 1 seule variable testé à chaque division (mtry=1) \n")
+cat("On a une erreur d'OOB de", tail(bagstump$err.rate[, 1], 1) *100, "% pour le bagging stump (mtry=p) et maxnode=2 \n")
+cat("On a une erreur d'OOB de", tail(rfstump$err.rate[, 1], 1)  *100, "% pour le Random Forest stump (mtry= p^(1/2)) et maxnode=2")
+}
+```
+On obtient cette fois-ci une erreur un peu plus elevé pour mtry=p.
+
+Ce qu'on peut en conclure d'après nos résultats: 
+
+    -On ne doit pas limiter la profondeur de nos arbres à 1 car on aura des taux d'erreurs elevées. Dans ce cas il serait préferable de mettre la valeur de mtry à 1 
+    -En laissant la profondeur de l'arbre par défaut, on ne doit pas choisir une valeur de mtry trop basse, ni trop elevée. Dans notre cas, on a vu que ptry=p/3 nous donnait le taux d'erreur la moins elevé. 
+    
+On a remarqué que les importances de variables ne sont pas les mêmes, on ne peut pas dire qu'un modèle est meilleur selon ses performances. 
+
+## 4.5] Boite à moustache
+On va constuire un modèle avec 100 arbres et un autre avec 500 arbres (nombres par défaut) pour étudier l'importance des variables.
+
+```{r}
+#On fait 20 simulation 
+vimultntree100 <- matrix(NA, nrow = 20, ncol = p)
+for (i in 1:20) {
+rf <- randomForest(type ~ ., spam.app, ntree = 100, importance = TRUE)
+vimultntree100[i, ] <- rf$importance[, nlev + 1]
+}
+boxplot(vimultntree100)
+
+```
+
+
+
+
+```{r}
+#on fait 20 simulations
+vimult <- matrix(NA, nrow = 20, ncol = p)
+for (i in 1:20) {
+rf <- randomForest(type ~ ., spam.app, importance = TRUE)
+vimult[i, ] <- rf$importance[, nlev + 1]
+}
+boxplot(vimult)
+```
+
+
+    On observant Les boxplots des modèles, on remarque que la variance est plus elevée pour le modèle à 100 arbres comparé à 500 arbres. On a un modèle plus robuste avec 500 arbres.
+
+    On peut s'en rendre compte que les variables les plus importantes sont ceux qui sont eloigné de l'axe des abscisse , on peut retrouver les variables comme charExclamation, charDollar, capitalLong, capitalTotal...
+
+
+
+
+# 5] Vsurf
+
+##5.1] Application de Vsurf
+
+On charge la librarie VSURF qui est un package R pour la sélection de variables à l’aide de forêts aléatoires.
+
+```{r}
+library(VSURF)
+```
+
+
+On appliquer VSURF sur un sous-ensemble de 500 observations du tableau de données
+spam.app pour un temps de calcul plus rapide.
+
+```{r}
+small.n <- 500
+ytable.app <- table(spam.app$type)
+small.app <- c(sample(1:ytable.app[2], ytable.app[2]/n * small.n),
+sample((ytable.app[2] + 1):n, ytable.app[1]/n * small.n))
+spam.small.app <- spam.app[small.app, ]
+table(spam.small.app$type)
+```
+
+
+```{r}
+vsurf.stump <- VSURF(type ~ ., spam.small.app, maxnodes = 2)
+```
+## 5.2 Interprétation grpahiques
+```{r}
+summary(vsurf.stump)
+
+plot(vsurf.stump)
+
+colnames(spam.app[vsurf.stump$varselect.interp])
+```
+
+
+Dans les sorties du “summary”, nous avons des étapes pour la selection de variable :
+
+1] Le classement des variables selon leurs importances par ordre décroissante.
+
+-1] Un seuil est définit. Les variables sont filtées selon le seuil. On retient toutes les variables supérieurs à ce seuil et on rejete le reste. Ce seuil est choisit automatiquement par l’algorithme.
+
+-2] Les variables sont choisit selon leurs intérprétations 
+
+-3]  Les variables qui sont finalement gardé sont ceux qui sont pertinentes pour la prédiction. 
+
+
+### 5.2.1] figure 1 (en haut à gauche)
+    
+```{r}
+plot(vsurf.stump, step = "thres", imp.sd = FALSE, var.names = TRUE)
+```
+    
+    
+    Figure 1 (VI mean en fonction de variables) :On a un graphe des 57 variables les plus importantes (les autres auant une importance quasi nulle). Les variables qui sont au dessus du seuil rouge sont gardées. Le résultat du classement des variables est dessiné sur ce graphique. Les vraies variables sélectionnées sont significativement plus importantes que les variables bruyantes. On peut se rendre compte qu'on a à peu près une dizaine qui sont gardés (charDollar,hp...)
+    
+    
+### 5.2.2] figure 2 (en haut à droite) 
+    
+    Figure 2 (VI standard deviation en fonction de variable):Sur ce graphique on élminie des variables. À partir de cet ordre, le tracé des écarts types correspondants de VI est utilisé pour estimer une valeur seuil pour VI. Le seuil est représenté par la ligne horizontale rouge en pointillé, qui est fixé à la valeur de prédiction minimale donnée par un modèle CART qui s'adapte à cette courbe (la fonction verte constante par morceaux sur le même graphique). Seules les variables dont la VI moyenne dépasse ce niveau (c'est-à-dire au-dessus de la ligne rouge horizontale dans le graphique supérieur gauche de la figure 1) sont prises en compte.
+
+
+```{r}
+#Zoom sur le graphique en haut à droite
+plot(vsurf.stump, step = "thres", imp.mean = FALSE, ylim = c(0, 2e-4))
+```
+
+    En faisant un zoom, nous pouvons voir dans le graphique que les écarts types des vraies variables sélectionnées sont plus dispersées par rapport à ceux des variables rejetés qui sont proches de zéro. Les écart-types sont de plus en plus petit. Le seuil retenu conduit à conserver 19 variables
+
+### 5.2.3] Figure 3 (en bas à gauche)
+
+```{r}
+plot(vsurf.stump, step = "interp", imp.sd = FALSE, var.names = TRUE)
+```
+
+    figure 3 (OBB error en fonction de nested models) : Dans le graphique, on voit que l'erreur diminue assez rapidement. Elle atteint son (presque) minimum lorsque les 6 premières variables sont incluses dans le modèle (ligne rouge verticale). Après la ligne verticale rouge, la courbe continue à décroite. Le modèle sélectionné contient les variables comme charDollar,capitalAve..., alors que le minimum réel est atteint pour plus de variables (jusqu'à la variable you sur le graphique). Il y a une régle semblage à la 1 SE rule de Birenam et al. (1984) pour déterminer la ligne verticale rouge.
+
+
+###  5.2.4]figure 4 (en bas à droite)
+
+    Figure 4 (OOB error en fonction de predictive models): Il s'agit de la procédure de sélection des variables pour la prédiction.  Ce graphique représente les erreurs O0B pour la prédiction.  Il y a la fonction VSURF_pred qui est utilisé pour cette étape. On spécificie  taux d'erreur et les variables sélectionnées dans les arguments.
+    
+```{r}
+spam.vsurf.pred <- VSURF_pred(type ~ ., spam.small.app, err.interp = spam.interp$err.interp, varselect.interp = spam.interp$varselect.interp)
+```
+
+
+```{r}
+{
+plot(vsurf.stump, step = "pred", imp.sd = FALSE, var.names = TRUE)
+}
+  
+```
+    
+    On observe que l'erreur OOB diminue. Une variable est introduite seulement si la réduction de l’erreur est plusgrande qu’un seuil : la réduction de l’erreur doit être significativement plus grande que la variabilité moyenne obtenue en ajoutant des variables de bruit. Au final, on a 3 variables qui on été gardé par le modèle, parmis les variables qui sont gardés on a : charDollar, charExclamation, remove.
+
+# 5.2.5]Bonus VSURF en parallele
+    
+On détermine donc le nombre de cœurs utilisés pour exécuter VSURF en parallèle. Avec ma machinej'en ai 6, donc on fixera notre valeur à 6.
+
+```{r}
+vsurf.spam <- VSURF(type~., spam.app, parallel = TRUE, ncores = 6)
+```
+
+
+
+
+
+```{r}
+summary(vsurf.spam)
+
+plot(vsurf.spam)
+
+colnames(spam.app[vsurf.spam$varselect.interp])
+```
+
+
+    Comparé à VSURF avec une arbre de profondeur 1, on observe que cette fois-ci, en partant de 57 variables, la première étape d’élimination (les deux graphiques du haut de la Figure) les conserve quasiment toutes, l'étape d'interprétation (graphique en bas à gauche) sélectionne environ la moitié (21) des variables et pour la prédiction (graphique en bas à droite) 15.
+    
+# Conclusion 
+Les arbres CART pour la régression et la classification peuvent être construites de plusieurs façons (avec les paramètres par défaut, arbre stump, arbre maximal, arbre optimal, arbre avec l'application de la règle 1-SE de Bieinman...).  L'arbre optimal (prune) ou la règle du 1-SE, nous donne de meilleures performances sur de nouveaux jeux de données. Les performances restent correctes mais peuvent être améliorées. L'inconvénient du CART est le manque de stabilité de l'algorithme, pour corriger cela on peut faire appel à d'autres méthodes comme Random Forests et le bagging. En utilisant ses algorithmes d'ensemble, on a cet avantage que les performances seront meilleurs que CART mais on a un "effet de boîte de noire". En effet, le modèle n'est pas facile à interpréter et on peut faire appel à des méthodes d'interprétabilité comme le PDP (Partial Dependence Plot) ou sélectionner toutes les variables importantes, même si elles sont rebondantes, dans un but d'interprétation. Pour VSRUF, lorsqu’on a moins d’observation (n) et beaucoup de variables(p)  (n< p), il est préférable d’utiliser cette technique pour ne garder que les variables qui sont significatives. Grâce à cette méthode, on trouve un ensemble parcimonieux de variables importantes suffisant pour la prédiction.
+

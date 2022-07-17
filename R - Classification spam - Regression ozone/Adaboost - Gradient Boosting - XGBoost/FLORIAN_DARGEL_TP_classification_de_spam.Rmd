@@ -1,0 +1,486 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Nom Prenom : DARGEL Florian 
+
+# 2] Statistiques de base
+```{r}
+{
+library(kernlab) #Pour chargement de données spam
+library(xgboost) #Pour le modèle xgboost
+library(gbm) #pour gradient boosting 
+library(adabag) #pour adaboost
+data(spam) #données spam
+cat("On a un fichier qui contient", dim(spam)[1], "lignes et" , dim(spam)[2], "colonnes")
+}
+```
+
+En vérifiant la proportion des spams, on se rend compte que la proportion des classes n’est pas parfaitement équilibrée. On en a plus de non-spams que de spams.
+
+```{r}
+{
+barplot(prop.table(table(spam$type)),
+        col = rainbow(2),
+        ylim = c(0, 0.7),
+        main = "Class Distribution")
+
+cat("\n On a", table(spam$type)[1]/ (table(spam$type)[1] + table(spam$type)[2]) * 100, "% de notre distribution qui sont des non spam")
+cat("\n On a",table(spam$type)[2]/ (table(spam$type)[1] + table(spam$type)[2]) * 100, "% de notre distribution qui sont des spam")
+}
+```
+
+Un indicateur trivial qui pourrait servir de référence s'agit d'un arbre constitué uniquement de la racine (qui engendre alors un prédicteur constant). Il s'agit d'un arbre avec un biais élevé. Le taux d'erreur serait de 39.40448 %. On a plus de chance d'avoir un non-spam qu'un spam.  
+
+On prépare notre base d’apprentissage et notre base de test. On prend 80% pourl'apprentissage et 20% pour le test.
+
+```{r}
+{
+library(caTools)
+set.seed(32)
+split = sample.split(spam$type, SplitRatio = 0.8)
+spam.app = subset(spam, split == T)
+spam.test = subset(spam, split ==F)
+}
+```
+
+On affiche ci-dessous la table de contingence de la base d'entraînement et de test.
+```{r}
+table(spam.app$type)
+table(spam.test$type)
+```
+
+Le ratio sur le nombre de spam et non-spam répartis dans la base d'entrainement et de test sont quasiment similaires.
+
+```{r}
+{
+cat("\n On a un ratio de",table(spam.app$type)[1]/ table(spam.app$type)[2], "pour l'entrainement")
+cat("\n On a un ratio de", table(spam.test$type)[1]/ table(spam.test$type)[2], "pour le test")
+}
+```
+# 3] Utilisation adaboost
+On commence par l'algorithme adaboost qui s'implémente de manière simple et efficaces avec 10 itérations.
+
+```{r}
+{model_boosting <- boosting(type~., data = spam.app, mfinal=10)
+pred_boosting_test <- predict(model_boosting, spam.test)
+pred_boosting_app <- predict(model_boosting, spam.app)
+cat("\n Le taux d'erreur obtenu pour l'apprentissage est de ", pred_boosting_app$error * 100 , "%")
+cat("\n Le taux d'erreur obtenu pour le test est de ", pred_boosting_test$error * 100, "%")
+}
+```
+- On a bien des taux d'erreurs (apprentissage et test) qui sont inférieurs au classifieur trivial qui pourrait servir de référence.
+Le taux d'erreur obtenu lors de notre prédiction sur nos données d'apprentissage est moins élevé que celui des données test. Il est normal car on a appris nos données sur nos jeux de données d'apprentissage et prédit sur nos données d'apprentissage. 
+Le taux d'erreur obtenu est généralement bien inférieur à un modèle stump (arbre avec 1 profondeur) ou CART.
+
+
+On trace maintenant les courbes montrant l'évolution des erreurs sur la base d'apprentissage et de test en fonction du nombre d'itérations. On construit un modèle avec au maximum 500 itérations et une profondeur d'arbre à 3.
+```{r}
+{
+modelbis = boosting(type~., data = spam.app, mfinal=500, control = rpart.control(maxdepth=3))
+}
+```
+
+On récupère les erreurs sur la base d'apprentissage et de test
+```{r}
+{
+evol_app = errorevol(modelbis, spam.app)
+evol_test = errorevol(modelbis, spam.test)
+}
+```
+
+On affiche les erreurs
+```{r}
+{
+plot.errorevol(evol_test, evol_app)
+abline(h=min(evol_test[[1]]), col="red",lty=2,lwd=1) # erreur minimum du test
+abline(h=min(evol_app[[1]]), col="blue",lty=2,lwd=1) #erreur minimum de l'apprentissage
+}
+```
+- Sur le graphique, on observe que l’erreur d’apprentissage et de test a tendance à diminuer quand le nombre d'itérations augmente (à part un petit saut aux alentours de 150 itérations). L’erreur de test est supérieure à l’erreur d’apprentissage, c’est ce qui est normal car on prédit sur de nouvelles données que le modèle n’a pas apprises.
+```{r}
+{
+cat("\n L'erreur obtenu dans l'apprentissage est de",predict(modelbis,newdata=spam.app)$error * 100, "%")
+cat("\n L'erreur obtenu dans le test est de",predict(modelbis,newdata=spam.test)$error * 100, "%")
+}
+```
+- En augmentant le nombre de classifieur faible, on a pu obtenir un classifieur plus fort car l'erreur sur les données de test à diminué avec 500 itérations et on a limité notre de profondeur de l'arbre à 3.
+
+- Avec adaboost on observe qu'on évite le sur-ajustement de données car l'écart entre le taux d'erreur d'entrainement et de test n'est pas très important et on a très peu de paramètre à calibrer (nombre de pas, complexité des classifieurs faibles).
+
+# 4] Gradient boosting
+
+On a trois méthodes pour estimer le nombre optimal d'itérations pour
+le modèle gbm : un ensemble de test indépendant (test), une estimation hors sac-
+tion (OOB) et la validation croisée v-fold (cv). 
+
+Nous allons prendre en compte deux méthodes ici : un ensemble de test indépendant (test) et validation croisée v-fold (cv).
+
+### 4.1] méthode test
+
+
+Avant d'implémenter notre modèle gbm , on doit convertir notre variable cible en valeur numérique 0 non-spams et 1 spam.
+```{r}
+set.seed(32)
+split = sample.split(spam$type, SplitRatio = 0.8)
+spam.app = subset(spam, split == T)
+spam.test = subset(spam, split ==F)
+```
+
+
+```{r}
+{
+dataspam = rbind(spam.app, spam.test) #rassemblement de data 
+dataspam$type <- as.numeric(dataspam$type)-1 #convertit le label en 0 non spams et 1 spams
+table(dataspam$type)
+}
+
+```
+
+
+```{r}
+spam.app$type <- as.numeric(spam.app$type)-1 #convertit le label apprentissage en 0 non spams et 1 spams
+spam.test$type <- as.numeric(spam.test$type)-1 #convertit le label test en 0 non spams et 1 spams
+table(spam.test$type)
+table(spam.app$type)
+```
+Pour commencer on va créer notre modèle en prenant en compte toute notre base de données spam (apprentissage et test) et évaluer sur les données test. On entraine notre mdèle avec 3 000 itérations.
+
+```{r}
+{
+modeltest.gbm <- gbm(type~. , data=dataspam, distribution="bernoulli", n.trees=3000, train.fraction = 0.8)
+}
+```
+
+```{r}
+{
+valuetest_gbm <- gbm.perf(modeltest.gbm, method="test")
+cat("La valeur optimal du nombre d'itération est de",valuetest_gbm,"arbres")
+}
+```
+On cherche le meilleur sous modèle d'un modèle trop fourni (modele avec 3000 abres), c'est à dire le nombre d'arbre optimal pour la prédiction. La ligne noire représente la déviance bernoulli de l'entraînement et la ligne route la déviance bernoulli de test. L'arbre sélectionné pour la prédiction, indiqué par la ligne bleue verticale, est l'arbre qui minimise l'erreur sur les données test
+```{r}
+{
+predtest.gbm.test <- predict(modeltest.gbm,newdata=spam.test, n.trees=valuetest_gbm)
+predtest.gbm.train<- predict(modeltest.gbm,newdata=spam.app, n.trees=valuetest_gbm)
+errtestgbm_train <- mean((predtest.gbm.train>0)!=spam.app$type) 
+errtestgbm_test <- mean((predtest.gbm.test>0)!=spam.test$type)
+cat("\n Le taux d'erreur obtenu sur les données d'apprentissage est de",errtestgbm_train *100,"%")
+cat("\n Le taux d'erreur obtenu sur les données de test est de",errtestgbm_test*100,"%")
+}
+```
+- On a obtenu un taux d'erreur inférieur à adaboost sur les données test et une valeur un peu plus elevé pour l'apprentissage mais cette méthode n'est pas forcement la bonne approche car on prend en compte que 2 échantillons de spam pour évaluer la performance de notre modèle.
+
+Cette fois-ci nous allons prendre en compte 3 échantillons : entrainement, validation et test pour voir si notre modèle peut s'adapter à plusieurs échantillons différents.
+
+
+On construit notre modèle : apprentissage et validation 
+```{r}
+modeltest.gbm2 <- gbm(type~. , data=spam.app , distribution="bernoulli", n.trees=3000, train.fraction = 0.8)
+```
+
+
+```{r}
+{
+valuetest_gbm2 <- gbm.perf(modeltest.gbm2, method="test")
+cat("La valeur optimal du nombre d'itération est de",valuetest_gbm2,"arbres")}
+```
+- Sur le graphique on observe bien une grande différence par rapport au précédent. L'écart de la déviance de Bernoulli entre l'apprentissage et test est important et pour le test elle a tendance à augmenter. Le nombre d'itération optimale est bien plus faible. 
+On effectue maintenant notre prédiction sur la base de test.
+```{r}
+{
+predtest.gbm.test2 <- predict(modeltest.gbm2,newdata=spam.test, n.trees=valuetest_gbm2)
+predtest.gbm.train2<- predict(modeltest.gbm2,newdata=spam.app, n.trees=valuetest_gbm2)
+errtestgbm_train2 <- mean((predtest.gbm.train2>0)!=spam.app$type) 
+errtestgbm_test2 <- mean((predtest.gbm.test2>0)!=spam.test$type)
+cat("\n Le taux d'erreur obtenu sur les données d'apprentissage est de",errtestgbm_train2 *100,"%")
+cat("\n Le taux d'erreur obtenu sur les données de test est de",errtestgbm_test2*100,"%")
+}
+```
+- On se rend compte que notre modèle ne s'adapte pas à de nouvels échantillons. L'erreur d'apprentissage et de test sont plus importants. Pour corriger cela on va procéder par la méthode de validation croisée. La validation croisée permettra de tirer plusieurs ensembles de validation d'une même base de données et ainsi d'obtenir une estimation plus robuste, avec biais et variance, de la performance de validation du modèle.
+
+### 4.2] méthode cv
+
+```{r}
+model.gbm <- gbm(type~. , data=spam.app , distribution="bernoulli", n.trees=3000, cv.folds=5, train.fraction = 1)
+```
+
+gbm offre une validation croisée v-fold pour estimer le nombre optimal d'itérations. Lors de l'ajustement du modèle gbm, on met cv.folds=5, gbm fait une validation croisée 5 fois. Il ajuste cinq modèles gbm afin de calculer l'estimation de l'erreur de validation croisée, puis ajuste un sixième et dernier modèle gbm avec n.arbresiterations en utilisant toutes les données. 
+L'objet du modèle retourné aura un composant étiqueté cv.error. gbm.more effectuera itérations gbm supplémentaires mais ne s'ajoutera pas à la composante cv.error. On utilise gbm.perf(...,method="cv") pour obtenir l'estimation de la validation croisée.
+
+```{r}
+{
+model.gmb.optimal <- gbm.perf(model.gbm,method="cv")
+cat("La valeur optimal du nombre d'itération est de",model.gmb.optimal,"arbres")
+}
+```
+
+- 1033 est le nombre d'itération optimal. On observe que le a deviance de bernouilli pour les données de validation augmente légerement après le nombre d'iteration optimal, tandis que celui de l'apprentissage continue à diminuer.
+
+On crée un modèle gbm avec le nombre d'arbre optimal qui est de 1033 abres
+
+```{r}
+{
+pred.gbm.test <- predict(model.gbm,newdata=spam.test, n.trees=model.gmb.optimal )
+pred.gbm.train<- predict(model.gbm,newdata=spam.app, n.trees=model.gmb.optimal )
+errgbm_train <- mean((pred.gbm.train>0)!=spam.app$type) 
+errgbm_test <- mean((pred.gbm.test>0)!=spam.test$type)
+cat("\n Le taux d'erreur obtenu sur les données d'apprentissage est de",errgbm_train *100,"%")
+cat("\n Le taux d'erreur obtenu sur les données de test est de",errgbm_test*100,"%")
+}
+```
+- Les taux d'erreur obtenus de l'apprentissage et test sont à peu près similaires à notre 1er modèle gradient boosting (notre modèle en prenant en compte toute notre base de données spam (apprentissage et test). Par contre ce modèle est plus robuste car elle peut s'adapter à de nouvelles données. 
+
+
+On va maintenant améliorer nos performances en faisant varier les valeurs des différents hyperparamètres (shrinkage, profondeur des arbres...) 
+
+### 4.3] Validation croisée : Hyperparamètres / échantillons 
+
+```{r}
+{
+library(caret)
+T1<-proc.time()
+
+trainControl <- trainControl(method = "cv",
+                          number = 5,
+                          returnResamp="all", ### use "all" to return all cross-validated metrics
+                          search = "grid")
+
+tuneGrid <- expand.grid(
+             n.trees = c(100,500,1000), #nombre d'iteration M
+             shrinkage = c(0.25,0.01,0.001), #paramètre de régularisation lambda
+             interaction.depth = c( 1,30), #profondeur des arbres
+             n.minobsinnode=c(5,25) #la division des noeuds s'arréte lorsqu'un certain nombre d'observations se trouvent dans chaque nœud
+                                )
+gbm.op <- train(as.factor(type) ~.,
+                data = spam.app,
+                method = "gbm",
+                tuneGrid = tuneGrid,
+                trControl = trainControl,
+                verbose=FALSE)
+
+T2<-proc.time() 
+cat("Le temps d'excecution est de : ",(T2[3]-T1[3]), "seconde")
+}
+```
+
+```{r}
+plot(gbm.op)
+```
+On affiche les valeurs optimales obtenues par le modèle.
+```{r}
+gbm.op$bestTune
+```
+
+Remarque : taux d'erreur = 1 - accuracy. Plus la valeur d'accuracy est elevé et plus le taux d'erreur diminue. 
+
+- Lorsque la valeur du shrinkage est faible, il est conseillé d'augmenter le nombre d'arbres pour augmenter l'accuracy, sinon les performances du modèle seront faibles. On peut choisir un shrinkage assez élevé (mais pas trop car on a vu que la meilleure valeur choisit pour cet hypera métré et 0.01 et non 0.25) et définir un nombre d'arbres pas très élevé (au moment où la valeur d'accuracy commence à se stabiliser) pour avoir de bonnes performances.
+  
+```{r}
+gbm.op$results
+```
+  
+  
+```{r}
+{
+pred.gbm.gridsearchcv.test <- predict(gbm.op, newdata=spam.test)
+pred.gbm.gridsearchcv.app <- predict(gbm.op, newdata=spam.app)
+errgbm.gridsearchcv.test <- mean((pred.gbm.gridsearchcv.test)!=spam.test$type)
+errgbm.gridsearchcv.app <- mean((pred.gbm.gridsearchcv.app)!=spam.app$type)
+cat("\n L'erreur obtenu sur les données de test est de",errgbm.gridsearchcv.test * 100,"%")
+cat("\n L'erreur obtenu sur les données d'apprentissage est de", errgbm.gridsearchcv.app * 100, "%")
+}
+```
+- On remarque que l'erreur apprentissage obtenu est très faible avec la méthode de validation croisée comparé à précédemment sans la validation croisée. On remarque notamment que l'erreur de test a diminué comparé à précédemment sans la validation croisée.
+
+- Choisir les bons hyperparamètres peut-être une bonne méthode, dans notre cas le taux d'erreur a bien diminué pour le test comparé au gbm sans validation croisé. Sur les données d'apprentissage on a un taux d'erreur vraiment très bas (proche de 0), on aurait tendance à dire qu'il y aurait du sur-apprentissage et notre modèle aura un taux d'erreur plus élevé sur de nouvelles données mais d'après nos résultats obtenus sur les données de test ce n'est pas le cas.
+
+- Même si on a gagné en performances, l'inconvénient avec cette méthode est que le temps de calcul peut être long selon le nombre de valeur qu'on décide de mettre dans les hyperparamètres.
+
+
+# 5] XGBoost
+
+### 5.1] Implémentation du modèle
+
+Une variante du gradient boosting peut être utilisé pour les détection de spam. Il a été utilisé par beaucoup de gagnants des competitions comme kaggle en apprentissage. Il serait intéressant de l'utiliser dans notre cas. 
+
+On entraine notre modèle avec 100 itération. 
+
+On prépare nos données de façon qu'il s'éxecute dans notre modèle.
+
+```{r}
+{
+X_train = data.matrix(spam.app[,-58])                  # independent variables for train
+y_train = spam.app[,58]                                # dependent variables for train
+  
+X_test = data.matrix(spam.test[,-58])                    # independent variables for test
+y_test = spam.test[,58]                                   # dependent variables for test
+
+# convert the train and test data into xgboost matrix type.
+xgboost_train = xgb.DMatrix(data=X_train, label=y_train)
+xgboost_test = xgb.DMatrix(data=X_test, label=y_test)
+}
+```
+
+
+
+```{r}
+{
+#Entraine le modèle en utilisant les données d'entrainement 
+model.xgb <- xgboost(data = xgboost_train,                    # le jeux de données   
+                 nrounds=100, objective="binary:logistic",    #la fonction de coût 
+                 verbose = FALSE)                             #Pour éviter d'afficher le resultat
+}
+```
+
+
+```{r}
+{
+#utilisation du modèle pour faire de la prédiction sur le jeux de données test et rain
+predxgb.test = predict(model.xgb, xgboost_test)
+predxgb.app = predict(model.xgb, xgboost_train)
+errxgb.test <- mean((predxgb.test>0.5)!=y_test)
+errxgb.app <- mean((predxgb.app>0.5)!=y_train)
+cat("\n L'erreur obtenu sur les données d'apprentissage est de",errxgb.app * 100,"%") 
+cat("\n L'erreur obtenu sur les données de test est de ",errxgb.test * 100, "%")
+}
+```
+- Avec 100 itérations, on obtient un taux d'erreur assez bas pour le test qui est bien inférieur à la référence du classifieur trivial. Le taux d'erreur d'erreur est également inférieur aux modèles précédents à par le gbm avec la validation croisée (hyperparamètres).
+
+- Le taux d'erreur sur l'apprentissage est très bas (proche de 0). L'avantage est que l'éxecution de ce modèle est rapide et on obtient de bonne performance.
+
+### 5.2] validation croisée : échantillon
+
+On procède maintenant avec la méthode de la validation croisée pour avoir un modèle plus robuste.
+```{r}
+{
+T1<-proc.time()  
+model.xgb.cv <- xgb.cv(data = xgboost_train,                    # the data   
+                 nrounds=100,
+                 nfold = 5,
+                 objective="binary:logistic",
+                 eval_metric = "logloss",
+                 verbose = FALSE
+                )     
+T2<-proc.time() 
+cat("Le temps d'excecution est de : ",(T2[3]-T1[3]), "seconde")
+}
+```
+
+```{r}
+
+print(model.xgb.cv)
+```
+Pour chaque itération, on affiche la valeur de la fonction de perte obtenue pour l'entrainement et le test
+```{r}
+{
+plot(model.xgb.cv$evaluation_log$train_logloss_mean, col="blue", xlab="", ylab="")
+lines(model.xgb.cv$evaluation_log$test_logloss_mean, col="red")
+legend(x="topright", legend=c("apprentissage","test"), col=c("blue","red"), pch=c(15,15))
+title(main = "Fonction de coût en fonction du nombre d'itérations",
+      xlab = "Nombre d'itérations" , ylab = "Valeur de la fonction de coût")
+}
+```
+On observe que plus le nombre d'itérations est grand et plus la valeur de la fonction de perte pour les données d'apprentissage diminue. Pour les données test, elle a tendance à se stabilise au bout d'un certain nombre d'itérations mais augmente légèrement quand le nombre d'itérations augmente. Quand on augmente le nombre d'itérations notre modèle peut surapprendre sur nos données d'apprentissage. 
+
+```{r}
+{
+minlog =min(model.xgb.cv$evaluation_log[, test_logloss_mean])
+min_logloss_index = which.min(model.xgb.cv$evaluation_log[, model.xgb.cv$evaluation_log$test_logloss_mean])
+cat("\n la valeur de la fonction de perte minimale obtenue est de",minlog)
+cat("\n le nombre d'itération optimal est de ",min_logloss_index)
+}
+```
+On va donc lancer notre modèle avec ce nombre d'itération optimale.
+```{r}
+model.xgb.opt <- xgboost(data = xgboost_train,                    # the data   
+                 nrounds=min_logloss_index,
+                 objective="binary:logistic",
+                 eval_metric = "logloss",
+                 verbose = FALSE
+                )     #error binary classification error rate 
+```
+
+On test ensuite notre mdèle sur notre jeux de données test
+```{r}
+{
+#use model to make predictions on test data
+predxgb.testopt = predict(model.xgb.opt, xgboost_test)
+predxgb.appopt = predict(model.xgb.opt, xgboost_train)
+errxgb.testopt <- mean((predxgb.testopt>0.5)!=y_test)
+errxgb.appopt <- mean((predxgb.appopt>0.5)!=y_train)
+cat("\n L'erreur obtenu sur les données d'apprentissage est de",errxgb.appopt * 100,"%") 
+cat("\n L'erreur obtenu sur les données de test est de ",errxgb.testopt * 100, "%")
+}
+```
+L'erreur sur les données de test a diminuée. L'erreur sur les données d'apprentissage a légèrement augmenté car on a pris en compte un nombre d'itération inférieur à précédement (100). L'avantage est qu'on n'a pas ce problème de sur-ajustement et notre modèle s'adapte bien à de nouvelles données.
+
+### 5.3] validation croisée : hyperparamétres et échantillons
+
+```{r}
+{
+T1<-proc.time()
+# On spécifie la technique CV qui sera transmise ultérieurement à la fonction train() et le paramètre de nombre est le "k" dans la validation croisée K-fold
+train_controlbis = trainControl(method = "cv", number = 5, search = "grid")
+
+set.seed(50)
+
+#La grille de réglage
+gbmGridbis <-  expand.grid(max_depth = c(1, 5, 10), 
+                        nrounds = c(50,100,500),    # nombre d'arbre
+                        # default values below
+                        eta = c(0.1,0.3), #learning_rate
+                        gamma = c(0,0.1), #min_split_loss
+                        subsample = 1, #Le régler sur 1 signifie que XGBoost échantillonnerait au hasard la totalité des données d'entraînement avant de faire pousser des arbres.
+                        
+                        min_child_weight = 1,
+                        colsample_bytree = 0.6)
+
+# training a XGboost classification tree model avec les valeurs des hyperparamètres
+model = train(as.factor(type) ~., data =spam.app, method = "xgbTree", trControl = train_controlbis, tuneGrid = gbmGridbis,  verbose = FALSE, verbosity = 0)
+T2<-proc.time() 
+cat("Le temps d'excecution est de : ",(T2[3]-T1[3]), "seconde")
+}
+```
+
+
+```{r}
+plot(model)
+```
+
+On peu se rendre compte qu'il faut bien choisir les valeurs des hyperparamètres pour que notre modèle s'adapte à notre jeux de données. 
+
+- La profondeur de l'arbre : si on crée notre modèle avec une profondeur de 1, on doit augmenter le nombre d'itération pou diminuer le taux d'erreur.
+
+- eta : avec une valeur de taux apprentisage elevé et gamma faible (en bas à droite du graphique) les performance du modèle peuvent diminué lorsqu'on augmente le nombre d'abre avec une profondeur d'arbre elevée. 
+
+- gamma : avec une valeur de gamma plus elevé on peut augmenter les performances du modèles (en haut à droite du graphique)
+
+- Le nombre d'arbres : Il est probable que le taux d'erreur peut diminuer si on augmente le nombre d'arbre en choisissant de bonnes valeurs pour les autres hyperparamètres
+
+
+
+
+On affiche ci-dessous les meilleurs valeurs sur les hyperparamètres qui ont été choisit par le modèle.
+
+```{r}
+model$bestTune
+```
+Le taux d'erreur minimal est obtenu avec 100 itération. 
+
+```{r}
+{
+pred.xgb.gridsearchcv.test <- predict(model, newdata=spam.test[-58])
+pred.xgb.gridsearchcv.app <- predict(model, newdata=spam.app[-58])
+errxgb.gridsearchcv.test <- mean((pred.xgb.gridsearchcv.test)!=spam.test$type)
+errxgb.gridsearchcv.app <- mean((pred.xgb.gridsearchcv.app)!=spam.app$type)
+cat("\n L'erreur obtenu sur les données de test est de",errxgb.gridsearchcv.test * 100,"%")
+cat("\n L'erreur obtenu sur les données d'apprentissage est de", errxgb.gridsearchcv.app * 100, "%")
+}
+```
+On a maintenant un modèle qui s'adapte à de nouvelle jeux de données et le taux d'erreur est quasiment similaire à notre modèle précédent (validation croisé sur l'échantillon). Le taux d'erreur obtenu sur l'apprentissage est cette fois-ci plus faible.  
+
+# 6] Conclusion
+
+Après avoir traité les modèles d'adaboost, gradient boosting et XGBoost, je constante que le gradient boosting peut être une préférence parmi ses modèles. La raison est qu'après avoir effectué la méthode de validation croisée, on a un modèle qui se généralise le mieux avec de nouvelles données, on obtient de meilleures performances que les modèles précédents, mais le temps d'exécution peut être lent si on prend en compte les hyperparamètres. XGBoost nous donne aussi de bonne performance mais contient beaucoup d'hyperparamètres comparé aux autres modèles, on doit être vigilent et choisir des valeurs adaptès à notre jeux de données pour les hyperaramètres. On peut s'orienter vers un modèle moins complexe avec très peu d'hyperparamètres comme adaboost et le gbm même si les performances peuvent être moins bonnes.
