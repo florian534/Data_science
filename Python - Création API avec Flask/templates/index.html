@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prédiction de l'Iris</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1501594907352-04cda38ebc29?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxNDA1NjZ8MHwxfGFsbHwxfHx8fHx8fHwxNjAzNzIzOTMy&ixlib=rb-1.2.1&q=80&w=1080');
+            background-size: cover;
+            background-position: center;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        header {
+            background: #4CAF50;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        h1 {
+            margin: 0;
+        }
+        h2 {
+            color: #4CAF50;
+        }
+        p {
+            font-size: 1.2em;
+            line-height: 1.6em;
+        }
+        form {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input[type="number"] {
+            padding: 10px;
+            width: calc(100% - 22px);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .info {
+            background-color: #e7f1e7;
+            border-left: 5px solid #4CAF50;
+            padding: 10px;
+            margin: 20px 0;
+        }
+        .info h2 {
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .error {
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Prédiction de l'Iris</h1>
+        </header>
+        <p>Bienvenue sur notre application de prédiction pour la base de données Iris. Utilisez le formulaire ci-dessous pour entrer les caractéristiques d'une fleur d'Iris et obtenir une prédiction sur la classe de la fleur.</p>
+        
+        <form id="predict-form" onsubmit="event.preventDefault(); predict();">
+            <label for="sepal_length">Longueur du sépale (cm) :</label>
+            <input type="number" id="sepal_length" step="0.1" required>
+            
+            <label for="sepal_width">Largeur du sépale (cm) :</label>
+            <input type="number" id="sepal_width" step="0.1" required>
+            
+            <label for="petal_length">Longueur du pétale (cm) :</label>
+            <input type="number" id="petal_length" step="0.1" required>
+            
+            <label for="petal_width">Largeur du pétale (cm) :</label>
+            <input type="number" id="petal_width" step="0.1" required>
+            
+            <button type="submit">Prédire</button>
+        </form>
+        
+        <div id="result" class="result"></div>
+        
+        <div class="info">
+            <h2>Présentation de la Base de Données Iris</h2>
+            <p>La base de données Iris est une célèbre base de données utilisée pour les démonstrations d'algorithmes d'apprentissage automatique. Elle contient des mesures de longueur et largeur des sépales et des pétales pour trois espèces différentes d'Iris :</p>
+            <ul>
+                <li><strong>Iris-setosa</strong></li>
+                <li><strong>Iris-versicolor</strong></li>
+                <li><strong>Iris-virginica</strong></li>
+            </ul>
+            <p>Voici un aperçu des premières lignes de la base de données :</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Longueur du sépale (cm)</th>
+                        <th>Largeur du sépale (cm)</th>
+                        <th>Longueur du pétale (cm)</th>
+                        <th>Largeur du pétale (cm)</th>
+                        <th>Espèce</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Remplacez ces lignes avec les données réelles si nécessaire -->
+                    <tr>
+                        <td>5.1</td>
+                        <td>3.5</td>
+                        <td>1.4</td>
+                        <td>0.2</td>
+                        <td>Iris-setosa</td>
+                    </tr>
+                    <tr>
+                        <td>4.9</td>
+                        <td>3.0</td>
+                        <td>1.4</td>
+                        <td>0.2</td>
+                        <td>Iris-setosa</td>
+                    </tr>
+                    <tr>
+                        <td>4.7</td>
+                        <td>3.2</td>
+                        <td>1.3</td>
+                        <td>0.2</td>
+                        <td>Iris-setosa</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function predict() {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sepal_length: parseFloat(document.getElementById('sepal_length').value),
+                    sepal_width: parseFloat(document.getElementById('sepal_width').value),
+                    petal_length: parseFloat(document.getElementById('petal_length').value),
+                    petal_width: parseFloat(document.getElementById('petal_width').value)
+                })
+            });
+            
+            const data = await response.json();
+            
+            const resultDiv = document.getElementById('result');
+            if (response.ok) {
+                resultDiv.innerHTML = `<strong>Classe prédite :</strong> ${data.predicted_class}<br>`;
+            } else {
+                resultDiv.innerText = `Erreur : ${data.error}`;
+            }
+        }
+    </script>
+</body>
+</html>
+
