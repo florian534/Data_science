@@ -1,11 +1,5 @@
 Dans ce répertoire se trouvent mes projets académiques et personnels, majoritairement codés en Python et R. Voici quelques exemples de projets  : 
 
-Des projets en optimisation (python/cplex) : 
-- Construction d'un stade dans les meilleurs délais.
-- Theorie des graphes : algorithme de Dijkstra, plus proche voisin.
-- Optimistion avancée : Heuristique pour le problème du voyageur de commerce , optimisation stochastique (Engie : mix électrique renouvelable en 2050).
-
-
 En machine learning : apprentissage supervisée 
 - Classification : Fraude sur les cartes de crédits, classification de sentiments (NLP).
 - Regression : Technique de régression avancée des prix de l'immobilier
@@ -24,3 +18,8 @@ Création API avec Flask :
 
 Système de recommendation :
 - Netflix, MoviLens.
+
+Des projets en optimisation (python/cplex) : 
+- Construction d'un stade dans les meilleurs délais.
+- Theorie des graphes : algorithme de Dijkstra, plus proche voisin.
+- Optimistion avancée : Heuristique pour le problème du voyageur de commerce , optimisation stochastique (Engie : mix électrique renouvelable en 2050).
