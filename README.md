@@ -8,7 +8,7 @@ Des projets en optimisation (python/cplex) :
 
 En machine learning : apprentissage supervisée 
 - Classification : Fraude sur les cartes de crédits, classification de sentiments (NLP).
-- Regression : technique de régression avancée des prix de l'immobilier
+- Regression : Technique de régression avancée des prix de l'immobilier
 
 En machine learning : apprentissage non supervisée 
 - Analyse de données sur la Production d'électricité
