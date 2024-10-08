@@ -8,7 +8,7 @@ En machine learning : apprentissage non supervisée
 - Analyse de données sur la Production d'électricité
 
 En deep learning : 
-- Réseau de neuronnes convolutionnels : chihuahua or muffin (model VGG16,Fine tuning, keras tuner).
+- Réseau de neurones convolutionnels : chihuahua or muffin (model VGG16,Fine tuning, keras tuner).
 - Détection d'aliments sur les images (Yolo v3) et génération de nouvelles recettes (GPT2): projet file rouge INSA.
 - Utilisation du LLM (BERT) pour la classification de sentiments des données textuelles (NLP).
 - Utilisation du RAG avec le modèle LLM (LLaMa2).
