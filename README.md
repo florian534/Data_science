@@ -70,7 +70,24 @@ Représentation graphique de l'ACP
 Pour notre analyse,il a été pertinent d'effectuer l'analyse par mois afin d'examiner si, au cours des différentes saisons (hiver, printemps, été, automne), la plage de puissance injectée présentent des regroupements d'observations cohérents. En analysant la répartition de la puissance injectée selon les mois, nous constatons une concentration des observations sur la partie gauche du graphique pour les mois d'octobre, novembre, décembre et janvier. Cette tendance suggère une augmentation de la puissance injectée durant cette période hivernale. En revanche, pour les mois d'avril, mai et juin, les points sont majoritairement regroupés sur la partie droite du graphique, ce qui pourrait indiquer une diminution de la puissance injectée au printemps.
 
 ## 3. Deep learning
-- Réseau de neurones convolutionnels : chihuahua or muffin (model VGG16,Fine tuning, keras tuner).
+### a. Réseau de neurones convolutionnels : chihuahua or muffin**
+La base de données "Chihuahua or Muffin" est une collection amusante et populaire utilisée dans le contexte de la vision par ordinateur et des applications de deep learning. Cette base de données est un exemple classique de défi de classification d'images où l'objectif est de différencier des photos de chiens Chihuahua de celles de muffins, en raison de leur ressemblance surprenante.
+
+#### Techniques utilisées et résultats d'accuracy sur jeux de données test :
+- Convolution neural network (CNN) + dropout : 0.9507042169570923
+- Transfert learning (Model VGG16) : 0.9929577464788732
+- Fine Tuning (ResNet50 / geler les couches) : 0.9929577708244324
+- Keras Tuner : 0.625
+
+### b. Détection d'aliments sur les images**
+
+#### Techniques utilisées:
+- Création de la base de données (web scraping sur google images + données kaggle + fusion des images)
+- Modèle de détection Yolov3
+- Modèle de détection ssdlite_mobilnet_v2
+
+
+
 - Détection d'aliments sur les images (Yolo v3) et génération de nouvelles recettes (GPT2): projet file rouge INSA.
 - Utilisation du LLM (BERT) pour la classification de sentiments des données textuelles (NLP).
 - Utilisation du RAG avec le modèle LLM (LLaMa2).
@@ -78,8 +95,6 @@ Pour notre analyse,il a été pertinent d'effectuer l'analyse par mois afin d'ex
 Création API avec Flask :
 - Jeux de données Iris.
 
-Système de recommendation :
-- Netflix, MoviLens.
 
 Des projets en optimisation (python/cplex) : 
 - Construction d'un stade dans les meilleurs délais.
