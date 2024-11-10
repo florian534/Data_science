@@ -53,10 +53,23 @@ Le projet Kaggle "House Prices - Advanced Regression Techniques" est un concours
 ## 2. Machine Learning : Apprentissage non supervisé
 ### a. Analyse de données sur la Production d'électricité**
 
-Le but de notre étude était donc de faire une segmentation expliquée des jours en fonction  de la plage de puissance d'injection (kw)
+Le but de notre étude était donc de faire une segmentation expliquée des jours en fonction de la plage de puissance d'injection (kw).
 
 
-En deep learning : 
+#### Techniques utilisées :
+- Data engineering (groupby,normalisation,boxplot)
+- La classification hiérarchique (CAH)
+- Analyse en composante principale (ACP)
+  
+#### Résultats :
+Représentation graphique de l'ACP
+
+![image](https://github.com/user-attachments/assets/9eaeeca5-63f8-4be7-bb1c-b31fba8bc63c)
+
+
+Pour notre analyse,il a été pertinent d'effectuer l'analyse par mois afin d'examiner si, au cours des différentes saisons (hiver, printemps, été, automne), la plage de puissance injectée présentent des regroupements d'observations cohérents. En analysant la répartition de la puissance injectée selon les mois, nous constatons une concentration des observations sur la partie gauche du graphique pour les mois d'octobre, novembre, décembre et janvier. Cette tendance suggère une augmentation de la puissance injectée durant cette période hivernale. En revanche, pour les mois d'avril, mai et juin, les points sont majoritairement regroupés sur la partie droite du graphique, ce qui pourrait indiquer une diminution de la puissance injectée au printemps.
+
+## 3. Deep learning
 - Réseau de neurones convolutionnels : chihuahua or muffin (model VGG16,Fine tuning, keras tuner).
 - Détection d'aliments sur les images (Yolo v3) et génération de nouvelles recettes (GPT2): projet file rouge INSA.
 - Utilisation du LLM (BERT) pour la classification de sentiments des données textuelles (NLP).
