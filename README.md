@@ -61,7 +61,7 @@ Le but de notre étude était donc de faire une segmentation expliquée des jour
 
 
 #### Techniques utilisées :
-- Data engineering (groupby,normalisation,boxplot)
+- Data engineering (groupby, normalisation, boxplot)
 - La classification hiérarchique (CAH)
 - Analyse en composante principale (ACP)
   
@@ -116,7 +116,7 @@ Le RAG (Retrieval-Augmented Generation) combine la recherche d'informations et l
 
 ## 5. Création d'interface de programmation (API)
 
-### 1. Localisation et recommandation de restaurants
+### a. Localisation et recommandation de restaurants
 Dans ce projet, j'ai utilisé MongoDB et Python pour travailler sur une base de données populaire de restaurants de New York. Cette base de données contient des informations telles que le nom, l'adresse, le type de cuisine, la localisation géographique (coordonnées latitude et longitude), ainsi que des évaluations des restaurants, incluant des scores et des grades attribués par les clients. J'ai développé une carte interactive permettant de visualiser la localisation des restaurants, et intégré des filtres dynamiques pour que l'utilisateur puisse affiner sa recherche en fonction du type de cuisine, du score maximum et du grade des restaurants.
 
 ![image](https://github.com/user-attachments/assets/49c9096d-ed43-44cc-b6a1-ef771e3c3ec5)
@@ -126,15 +126,17 @@ Dans ce projet, j'ai utilisé MongoDB et Python pour travailler sur une base de 
 ![image](https://github.com/user-attachments/assets/aca78036-a8f7-486a-ac68-ac57786d6636)
 
 
-## 2.Jeux de données Iris 
+## b.Jeux de données Iris 
 
 
 Le jeu de données Iris est l'un des ensembles de données les plus célèbres en machine learning. Il contient 150 observations de fleurs appartenant à trois espèces différentes : Iris-setosa, Iris-versicolor et Iris-virginica. Chaque observation est décrite par 4 caractéristiques :
 
-Longueur des sépales (en cm)
-Largeur des sépales (en cm)
-Longueur des pétales (en cm)
-Largeur des pétales (en cm)
+
+-Longueur des sépales (en cm)
+-Largeur des sépales (en cm)
+-Longueur des pétales (en cm)
+-Largeur des pétales (en cm)
+
 
 Le but est souvent de prédire l'espèce de la fleur en se basant sur ces caractéristiques. Ce jeu de données est couramment utilisé pour des tâches de classification et pour tester différents algorithmes d'apprentissage supervisé.
 
