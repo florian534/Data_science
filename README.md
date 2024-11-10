@@ -21,7 +21,19 @@ Détecter les fraudes sur les cartes de crédit en utilisant des techniques de c
   
 Le meilleur modèle est la régression logistique (lr) avec un AUC (Area Under the Curve)  de 0.9782246384308207
 
-- Classification : classification de sentiments (NLP).
+### b. Classification : **Classification de Sentiments (NLP)**
+Dans ce projet, l'objectif était d'analyser des textes pour classifier les sentiments exprimés (positifs, négatifs, neutres).
+
+#### Techniques utilisées :
+- Traitement du langage naturel (NLP)
+- Modèles de classification supervisée : RandomForestClassifier
+
+#### Résultats :
+- **accuracy score** : 0.671448087431694
+- **Matrice de confusion** 
+
+![image](https://github.com/user-attachments/assets/2432aac6-917b-485b-bc67-52030ba4904e)
+
 - Regression : Technique de régression avancée des prix de l'immobilier
 
 En machine learning : apprentissage non supervisée 
