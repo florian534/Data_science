@@ -2,6 +2,8 @@ Dans ce répertoire se trouvent mes projets académiques et personnels, majorita
 
 En machine learning : apprentissage supervisée 
 - Classification : Fraude sur les cartes de crédits, classification de sentiments (NLP).
+  ![Courbe Roc](https://github.com/user-attachments/assets/06bea6fc-4cc3-4d83-9947-58148e06df5f)
+
 - Regression : Technique de régression avancée des prix de l'immobilier
 
 En machine learning : apprentissage non supervisée 
