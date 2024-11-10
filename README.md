@@ -79,7 +79,7 @@ La base de données "Chihuahua or Muffin" est une collection amusante et populai
 - Fine Tuning (ResNet50 / geler les couches) : 0.9929577708244324
 - Keras Tuner : 0.625
 
-### b. Détection d'aliments sur les images**
+### b. Projet fil rouge : détection d'aliments sur les images
 Ce projet est un fil rouge réalisé dans le cadre du mastère spécialisé "Expert en Science des Données" à l'INSA de Rouen. L'idée est de se placer dans le contexte où une personne dispose d'un ensemble d'ingrédients et souhaite créer une nouvelle recette qui n'existe pas encore. L'objectif est de permettre l'invention d'un plat inédit, potentiellement délicieux, en utilisant les ingrédients disponibles.
 
 Pour ce faire, nous avons développé un modèle qui, à partir d'une image d'ingrédients, détecte et identifie les éléments présents. Ces ingrédients seront ensuite utilisés pour générer une nouvelle recette (algorithme gpt-2). Dans ce projet, j'ai pris en charge la création de la base de données ainsi que la détection des aliments sur les images. 
@@ -88,7 +88,7 @@ Pour ce faire, nous avons développé un modèle qui, à partir d'une image d'in
 - Création de la base de données (web scraping sur google images + données kaggle + fusion des images)
 - Modèle de détection Yolov3
 - Modèle de détection ssdlite_mobilnet_v2
-- #### Résultats :
+#### Résultats :
 Détection sur une image avec ssdlite_mobilnet_v2
 
 ![image](https://github.com/user-attachments/assets/318b17d3-4a7a-439b-a5be-d4a2692a2d41)
@@ -98,9 +98,15 @@ Détection sur une image avec ssdlite_mobilnet_v2
   - 97 % de chance que l’ingrédient détecté soit une banane
   - 40 % de chance que l’ingrédient détecté soit une pomme.
 
+## 1. Large Language Model (LLM)
 
-- Détection d'aliments sur les images (Yolo v3) et génération de nouvelles recettes (GPT2): projet file rouge INSA.
+### b. Avis des tweets (NLP)
+Le but est de connaître les sentiments des personnes par leurs tweets envers les compagnies aériennes américaines. L'ensemble de données comporte 14640 tweets, les données de Twitter ont été extraites de février 2015, on se met dans le cas où on n'a pas de label, on utilise un algorithme de LLM avec huggline face qui nous donne un score de 1 à 5 sur l'avis du tweet.
+
+
+
 - Utilisation du LLM (BERT) pour la classification de sentiments des données textuelles (NLP).
+On se met dans le cas où on n'a pas de label, on utilise un algorithme de LLM avec huggline face qui nous donne un score de 1 à 5 sur l'avis du tweet.
 - Utilisation du RAG avec le modèle LLM (LLaMa2).
 
 Création API avec Flask :
