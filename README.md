@@ -78,7 +78,7 @@ Pour notre analyse,il a été pertinent d'effectuer l'analyse par mois afin d'ex
 ### a. Réseau de neurones convolutionnels : chihuahua or muffin
 La base de données "Chihuahua or Muffin" est une collection amusante et populaire utilisée dans le contexte de la vision par ordinateur et des applications de deep learning. Cette base de données est un exemple classique de défi de classification d'images où l'objectif est de différencier des photos de chiens Chihuahua de celles de muffins, en raison de leur ressemblance surprenante.
 
-#### Techniques utilisées et résultats d'accuracy sur jeux de données test :
+#### Techniques utilisées et résultats d'accuracy sur le jeu de données test :
 - Convolution neural network (CNN) + dropout : 0.9507042169570923
 - Transfert learning (Model VGG16) : 0.9929577464788732
 - Fine Tuning (ResNet50 / geler les couches) : 0.9929577708244324
