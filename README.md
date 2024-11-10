@@ -36,7 +36,8 @@ Le meilleur modèle est la régression logistique (lr) avec un AUC (Area Under t
 - **accuracy score** : 0.671448087431694
 - **Matrice de confusion** 
 
-![image](https://github.com/user-attachments/assets/2432aac6-917b-485b-bc67-52030ba4904e)
+![image](https://github.com/user-attachments/assets/17d71b35-3979-45cc-a642-0201615f008c)
+
 
 ### c. Régression : **Technique de régression avancée des prix de l'immobilier**
 Le projet Kaggle "House Prices - Advanced Regression Techniques" est un concours populaire qui consiste à prédire les prix de vente de maisons dans la ville d'Ames, Iowa, en utilisant diverses techniques de régression. Ce concours offre un excellent point d'entrée pour les praticiens de la science des données afin d'explorer des modèles de régression avancés, de manipuler des données et de comprendre la relation entre différentes caractéristiques des maisons et leurs prix de vente. On a un ensemble de données de plus de 1460 lignes, 80 variables + la variable cible.
@@ -108,7 +109,8 @@ Détection sur une image avec ssdlite_mobilnet_v2
 Le but est de connaître les sentiments des personnes par leurs tweets envers les compagnies aériennes américaines. L'ensemble de données comporte 14640 tweets, les données de Twitter ont été extraites de février 2015, on se met dans le cas où on n'a pas de label, on utilise un algorithme de LLM (BERT) avec hugging face qui nous donne un score de 1 à 5 sur l'avis du tweet.
 
 #### Résultats :
-![image](https://github.com/user-attachments/assets/99dfeb64-7a10-4c78-98e6-8f532beb5d5b)
+![9migpjpi](https://github.com/user-attachments/assets/8b10c5c9-ebd1-4cca-aefb-91c7761515b8)
+
 
 ### a. Utilisation du RAG avec le modèle LLM (LLaMa2)
 
