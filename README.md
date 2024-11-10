@@ -30,7 +30,7 @@ Le meilleur modèle est la régression logistique (lr) avec un AUC (Area Under t
 
 #### Techniques utilisées :
 - Traitement du langage naturel (NLP) : mettre en minuscule, enlever les caractères spéciaux et les ponctuations, tokenisation, retrait des stopwords, réduire les différences grammaticales (stemming), bag wof word
-- Modèles de classification supervisée : RandomForestClassifier
+- Modèle de classification supervisé : RandomForestClassifier
 
 #### Résultats :
 - **accuracy score** : 0.671448087431694
@@ -44,10 +44,10 @@ Le projet Kaggle "House Prices - Advanced Regression Techniques" est un concours
 
 #### Techniques utilisées :
 - Traitement des valeurs aberrantes (méthode : Z_scores et QQ plot)
-- Normalisez les données
+- Normalisez les données (centrée réduite)
 - Sélection des variables (matrice de corrélation, VIF)
 - Encodage des données qualitatifs
-- Modèles de classification supervisée : XGBoost
+- Modèle de classification supervisé : XGBoost
 
 #### Résultats :
 - **RMSE score** : 0.24954
