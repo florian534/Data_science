@@ -29,7 +29,7 @@ Le meilleur modèle est la régression logistique (lr) avec un AUC (Area Under t
   Le but est de connaître les sentiments des personnes par leurs tweets envers les compagnies aériennes américaines. L'ensemble de données comporte 14640 tweets, les données de Twitter ont été extraites de février 2015 et les contributeurs ont été invités à classer les tweets positifs, négatifs et neutres, 
 
 #### Techniques utilisées :
-- Traitement du langage naturel (NLP)
+- Traitement du langage naturel (NLP) : mettre en minuscule, enlever les caractères spéciaux et les ponctuations, tokenisation, retrait des stopwords, réduire les différences grammaticales (stemming), bag wof word
 - Modèles de classification supervisée : RandomForestClassifier
 
 #### Résultats :
