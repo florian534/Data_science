@@ -34,7 +34,7 @@ Le meilleur modèle est la régression logistique (lr) avec un AUC (Area Under t
 
 ![image](https://github.com/user-attachments/assets/2432aac6-917b-485b-bc67-52030ba4904e)
 
-### a. Régression : **Technique de régression avancée des prix de l'immobilier**
+### c. Régression : **Technique de régression avancée des prix de l'immobilier**
 Le projet Kaggle "House Prices - Advanced Regression Techniques" est un concours populaire qui consiste à prédire les prix de vente de maisons dans la ville d'Ames, Iowa, en utilisant diverses techniques de régression. Ce concours offre un excellent point d'entrée pour les praticiens de la science des données afin d'explorer des modèles de régression avancés, de manipuler des données et de comprendre la relation entre différentes caractéristiques des maisons et leurs prix de vente. On a un ensemble de données de plus de 1460 lignes, 80 variables + la variable cible.
 
 #### Techniques utilisées :
@@ -45,13 +45,16 @@ Le projet Kaggle "House Prices - Advanced Regression Techniques" est un concours
 - Modèles de classification supervisée : XGBoost
 
 #### Résultats :
-- **RMSE score** : 
+- **RMSE score** : 0.24954
+- ** soumission des prédictions sur kaggle** 
 ![image](https://github.com/user-attachments/assets/e7e58776-98e1-4eaf-906d-0a0d3d7c07b3)
 
 
+## 2. Machine Learning : Apprentissage non supervisé
+### a. Analyse de données sur la Production d'électricité**
 
-En machine learning : apprentissage non supervisée 
-- Analyse de données sur la Production d'électricité
+Le but de notre étude était donc de faire une segmentation expliquée des jours en fonction  de la plage de puissance d'injection (kw)
+
 
 En deep learning : 
 - Réseau de neurones convolutionnels : chihuahua or muffin (model VGG16,Fine tuning, keras tuner).
