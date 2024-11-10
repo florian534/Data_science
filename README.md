@@ -116,7 +116,9 @@ Le RAG (Retrieval-Augmented Generation) combine la recherche d'informations et l
 Dans ce projet, j'ai utilisé MongoDB et Python pour travailler sur une base de données populaire de restaurants de New York. Cette base de données contient des informations telles que le nom, l'adresse, le type de cuisine, la localisation géographique (coordonnées latitude et longitude), ainsi que des évaluations des restaurants, incluant des scores et des grades attribués par les clients. J'ai développé une carte interactive permettant de visualiser la localisation des restaurants, et intégré des filtres dynamiques pour que l'utilisateur puisse affiner sa recherche en fonction du type de cuisine, du score maximum et du grade des restaurants.
 #### Résultats :
 
-## 2.Jeux de données Iris avec Flask
+![image](https://github.com/user-attachments/assets/7aa7765f-204d-4ab0-95e1-f0776b293510)
+
+## 2.Jeux de données Iris 
 #Jeux de données Iris
 - Jeux de données Iris.
 
