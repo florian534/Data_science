@@ -1,4 +1,4 @@
-# Mes Projets Académiques et Personnels
+# Mes projets académiques et personnels
 
 Dans ce répertoire se trouvent mes projets académiques et personnels, principalement codés en Python et R. Voici quelques exemples de projets que j'ai réalisés :
 
