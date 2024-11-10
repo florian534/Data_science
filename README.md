@@ -45,6 +45,8 @@ Le projet Kaggle "House Prices - Advanced Regression Techniques" est un concours
 - Modèles de classification supervisée : XGBoost
 
 #### Résultats :
+- **RMSE score** : 
+![image](https://github.com/user-attachments/assets/e7e58776-98e1-4eaf-906d-0a0d3d7c07b3)
 
 
 
