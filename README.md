@@ -98,18 +98,26 @@ Détection sur une image avec ssdlite_mobilnet_v2
   - 97 % de chance que l’ingrédient détecté soit une banane
   - 40 % de chance que l’ingrédient détecté soit une pomme.
 
-## 1. Large Language Model (LLM)
+## 4. Large Language Model (LLM)
 
-### b. Avis des tweets (NLP)
-Le but est de connaître les sentiments des personnes par leurs tweets envers les compagnies aériennes américaines. L'ensemble de données comporte 14640 tweets, les données de Twitter ont été extraites de février 2015, on se met dans le cas où on n'a pas de label, on utilise un algorithme de LLM avec huggline face qui nous donne un score de 1 à 5 sur l'avis du tweet.
+### a. Avis des tweets (NLP)
+Le but est de connaître les sentiments des personnes par leurs tweets envers les compagnies aériennes américaines. L'ensemble de données comporte 14640 tweets, les données de Twitter ont été extraites de février 2015, on se met dans le cas où on n'a pas de label, on utilise un algorithme de LLM (BERT) avec hugging face qui nous donne un score de 1 à 5 sur l'avis du tweet.
 
+#### Résultats :
+![image](https://github.com/user-attachments/assets/99dfeb64-7a10-4c78-98e6-8f532beb5d5b)
 
+### a. Utilisation du RAG avec le modèle LLM (LLaMa2)
 
-- Utilisation du LLM (BERT) pour la classification de sentiments des données textuelles (NLP).
-On se met dans le cas où on n'a pas de label, on utilise un algorithme de LLM avec huggline face qui nous donne un score de 1 à 5 sur l'avis du tweet.
-- Utilisation du RAG avec le modèle LLM (LLaMa2).
+Le RAG (Retrieval-Augmented Generation) combine la recherche d'informations et la génération de texte pour améliorer la précision des réponses en s'appuyant sur des données externes. En intégrant des documents pertinents avant la phase de génération, il permet de réduire les hallucinations et d'offrir des réponses plus factuelles et actualisées. J'ai réalisé un test en utilisant comme fichier PDF ma thèse professionnelle sur l'étude et implémentation des méthodes d'interprétabilité dans les modèles de tarification automobile.
 
-Création API avec Flask :
+## 5. Création d'interface de programmation (API)
+
+### 1. Localisation et recommandation de restaurants
+Dans ce projet, j'ai utilisé MongoDB et Python pour travailler sur une base de données populaire de restaurants de New York. Cette base de données contient des informations telles que le nom, l'adresse, le type de cuisine, la localisation géographique (coordonnées latitude et longitude), ainsi que des évaluations des restaurants, incluant des scores et des grades attribués par les clients. J'ai développé une carte interactive permettant de visualiser la localisation des restaurants, et intégré des filtres dynamiques pour que l'utilisateur puisse affiner sa recherche en fonction du type de cuisine, du score maximum et du grade des restaurants.
+#### Résultats :
+
+## 2.Jeux de données Iris avec Flask
+#Jeux de données Iris
 - Jeux de données Iris.
 
 
