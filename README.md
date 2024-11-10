@@ -119,6 +119,9 @@ Dans ce projet, j'ai utilisé MongoDB et Python pour travailler sur une base de 
 ![image](https://github.com/user-attachments/assets/7aa7765f-204d-4ab0-95e1-f0776b293510)
 
 ## 2.Jeux de données Iris 
+
+![image](https://github.com/user-attachments/assets/3d7d3aa0-2220-45f7-b075-87b7b25a97c5)
+
 #Jeux de données Iris
 - Jeux de données Iris.
 
