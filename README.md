@@ -11,7 +11,7 @@ Ce projet utilise un ensemble de données contenant des transactions effectuées
 Détecter les fraudes sur les cartes de crédit en utilisant des techniques de classification supervisée.
 
 #### Modèle utilisé :
-- **Régression Logistique (Logistic Regression)**
+- **Régression Logistique**
   
 #### Résultats :
 - **AUC (Area Under the Curve)** : 0.9782
@@ -51,7 +51,7 @@ Le projet Kaggle "House Prices - Advanced Regression Techniques" est un concours
 
 
 ## 2. Machine Learning : Apprentissage non supervisé
-### a. Analyse de données sur la Production d'électricité**
+### a. Analyse de données sur la Production d'électricité
 
 Le but de notre étude était donc de faire une segmentation expliquée des jours en fonction de la plage de puissance d'injection (kw).
 
@@ -70,7 +70,7 @@ Représentation graphique de l'ACP
 Pour notre analyse,il a été pertinent d'effectuer l'analyse par mois afin d'examiner si, au cours des différentes saisons (hiver, printemps, été, automne), la plage de puissance injectée présentent des regroupements d'observations cohérents. En analysant la répartition de la puissance injectée selon les mois, nous constatons une concentration des observations sur la partie gauche du graphique pour les mois d'octobre, novembre, décembre et janvier. Cette tendance suggère une augmentation de la puissance injectée durant cette période hivernale. En revanche, pour les mois d'avril, mai et juin, les points sont majoritairement regroupés sur la partie droite du graphique, ce qui pourrait indiquer une diminution de la puissance injectée au printemps.
 
 ## 3. Deep learning
-### a. Réseau de neurones convolutionnels : chihuahua or muffin**
+### a. Réseau de neurones convolutionnels : chihuahua or muffin
 La base de données "Chihuahua or Muffin" est une collection amusante et populaire utilisée dans le contexte de la vision par ordinateur et des applications de deep learning. Cette base de données est un exemple classique de défi de classification d'images où l'objectif est de différencier des photos de chiens Chihuahua de celles de muffins, en raison de leur ressemblance surprenante.
 
 #### Techniques utilisées et résultats d'accuracy sur jeux de données test :
