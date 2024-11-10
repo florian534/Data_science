@@ -22,7 +22,7 @@ Détecter les fraudes sur les cartes de crédit en utilisant des techniques de c
 Le meilleur modèle est la régression logistique (lr) avec un AUC (Area Under the Curve)  de 0.9782246384308207
 
 ### b. Classification : **Classification de Sentiments (NLP)**
-Dans ce projet, l'objectif était d'analyser des textes pour classifier les sentiments exprimés (positifs, négatifs, neutres).
+  Le but est de connaître les sentiments des personnes par leurs tweets envers les compagnies aériennes américaines. L'ensemble de données comporte 14640 tweets, les données de Twitter ont été extraites de février 2015 et les contributeurs ont été invités à classer les tweets positifs, négatifs et neutres, 
 
 #### Techniques utilisées :
 - Traitement du langage naturel (NLP)
@@ -34,7 +34,19 @@ Dans ce projet, l'objectif était d'analyser des textes pour classifier les sent
 
 ![image](https://github.com/user-attachments/assets/2432aac6-917b-485b-bc67-52030ba4904e)
 
-- Regression : Technique de régression avancée des prix de l'immobilier
+### a. Régression : **Technique de régression avancée des prix de l'immobilier**
+Le projet Kaggle "House Prices - Advanced Regression Techniques" est un concours populaire qui consiste à prédire les prix de vente de maisons dans la ville d'Ames, Iowa, en utilisant diverses techniques de régression. Ce concours offre un excellent point d'entrée pour les praticiens de la science des données afin d'explorer des modèles de régression avancés, de manipuler des données et de comprendre la relation entre différentes caractéristiques des maisons et leurs prix de vente. On a un ensemble de données de plus de 1460 lignes, 80 variables + la variable cible.
+
+#### Techniques utilisées :
+- Traitement des valeurs aberrantes (méthode : Z_scores et QQ plot)
+- Normalisez les données
+- Sélection des variables (matrice de corrélation, VIF)
+- Encodage des données qualitatifs
+- Modèles de classification supervisée : XGBoost
+
+#### Résultats :
+
+
 
 En machine learning : apprentissage non supervisée 
 - Analyse de données sur la Production d'électricité
