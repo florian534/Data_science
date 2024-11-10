@@ -12,6 +12,10 @@ Détecter les fraudes sur les cartes de crédit en utilisant des techniques de c
 
 #### Modèle utilisé :
 - **Régression Logistique**
+- **K-plus proches voisin**
+- **Arbre de décision**
+- **Forêts aléatoires**
+  
   
 #### Résultats :
 - **AUC (Area Under the Curve)** : 0.9782
