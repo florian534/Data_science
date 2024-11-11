@@ -113,12 +113,15 @@ Le Bird Song Dataset sur Kaggle est une collection de sons d'oiseaux, souvent ut
 
 #### Résultats :
 Evaluation du modèle
+
 ![image](https://github.com/user-attachments/assets/8d4de32f-fed4-4051-9dd7-7b807e8adb5d)
 
 Matrice de confusion
+
 ![image](https://github.com/user-attachments/assets/f2c02ac9-1137-4ee6-afd9-edf934dba314)
 
 Score 
+
 F1: 0.9510736108330955 | Precision: 0.9504173755284869 | Recall: 0.9524755155991809 | AUC: 0.9979307755194758
 
 ## 4. Large Language Model (LLM)
