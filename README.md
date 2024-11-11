@@ -133,7 +133,7 @@ Le but est de connaître les sentiments des personnes par leurs tweets envers le
 ![9migpjpi](https://github.com/user-attachments/assets/8b10c5c9-ebd1-4cca-aefb-91c7761515b8)
 
 
-### a. Utilisation du RAG avec le modèle LLM (LLaMa2)
+### b. Utilisation du RAG avec le modèle LLM (LLaMa2)
 
 Le RAG (Retrieval-Augmented Generation) combine la recherche d'informations et la génération de texte pour améliorer la précision des réponses en s'appuyant sur des données externes. En intégrant des documents pertinents avant la phase de génération, il permet de réduire les hallucinations et d'offrir des réponses plus factuelles et actualisées. J'ai réalisé un test en utilisant comme fichier PDF ma thèse professionnelle sur l'étude et implémentation des méthodes d'interprétabilité dans les modèles de tarification automobile.
 
