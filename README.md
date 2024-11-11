@@ -58,7 +58,7 @@ Le projet Kaggle "House Prices - Advanced Regression Techniques" est un concours
 ## 2. Machine Learning : Apprentissage non supervisé
 ### a. Analyse de données sur la Production d'électricité
 
-Le but de notre étude était donc de faire une segmentation expliquée des jours en fonction de la plage de puissance d'injection (kw).
+On doit analyser les données sur la production d'électricité. Le but de notre étude est de faire une segmentation expliquée des jours en fonction de la plage de puissance d'injection (kw).
 
 
 #### Techniques utilisées :
