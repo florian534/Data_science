@@ -54,6 +54,12 @@ Le projet Kaggle "House Prices - Advanced Regression Techniques" est un concours
 - **soumission des prédictions sur kaggle** 
 ![image](https://github.com/user-attachments/assets/e7e58776-98e1-4eaf-906d-0a0d3d7c07b3)
 
+- **Analyse et interprétation du modèle XGBoost à l'aide de SHAP** 
+![image](https://github.com/user-attachments/assets/f0d14d39-1f8d-4bcc-8234-b2a4fdb7222d)
+
+OverallQual est une caractéristique cruciale dans ce modèle : une maison avec une qualité globale élevée (valeur élevée pour OverallQual, représentée en rouge) augmente le prix de vente prédictif, tandis qu'une maison de qualité plus faible (valeur faible, en bleu) diminue ce prix.
+
+
 
 ## 2. Machine Learning : Apprentissage non supervisé
 ### a. Analyse de données sur la Production d'électricité
