@@ -312,7 +312,7 @@ F1: 0.9510736108330955 | Precision: 0.9504173755284869 | Recall: 0.9524755155991
 The goal is to determine the sentiment of individuals based on their tweets about U.S. airlines. The dataset contains 14,640 tweets, extracted from Twitter data in February 2015. In this case, we use an LLM (BERT) algorithm with Hugging Face to generate a score from 1 to 5 indicating the sentiment of the tweet.
 
 Results:
-
+![9migpjpi](https://github.com/user-attachments/assets/8b10c5c9-ebd1-4cca-aefb-91c7761515b8)
 
 ### b. Using RAG with the LLM model (LLaMa2)
 RAG (Retrieval-Augmented Generation) combines information retrieval and text generation to enhance the accuracy of responses by leveraging external data. By integrating relevant documents before the generation phase, it reduces hallucinations and provides more factual and up-to-date answers. I performed a test using my professional thesis PDF on the study and implementation of interpretability methods in car pricing models.
