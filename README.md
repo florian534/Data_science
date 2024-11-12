@@ -1,3 +1,4 @@
+# ---VERSION EN FRANÇAIS---
 # Mes projets académiques et personnels
 
 Dans ce répertoire se trouvent mes projets académiques et personnels, principalement codés en Python et R. Voici quelques exemples de projets que j'ai réalisés :
@@ -177,3 +178,144 @@ Le but est souvent de prédire l'espèce de la fleur en se basant sur ces caract
 - Construction d'un stade dans les meilleurs délais. (cplex/python)
 - Theorie des graphes : algorithme de Dijkstra, plus proche voisin.
 - Optimistion avancée : Heuristique pour le problème du voyageur de commerce , optimisation stochastique (Engie : mix électrique renouvelable en 2050).
+
+
+
+
+
+# ---ENGLISH VERSION--
+
+My Academic and Personal Projects
+This repository contains my academic and personal projects, mostly coded in Python and R. Below are some examples of projects I have worked on:
+
+## 1. Machine Learning: Supervised Learning
+###a. Classification: Credit Card Fraud Detection
+This project uses a dataset containing transactions made by European credit card holders in September 2013. The dataset consists of 284,807 transactions, of which 492 are fraudulent. The imbalance is significant, with the positive class (fraud) representing only 0.172% of the transactions.
+
+Goal:
+Detect credit card fraud using supervised classification techniques.
+
+Models used:
+Logistic Regression
+K-Nearest Neighbors
+Decision Tree
+Random Forest
+Results:
+AUC (Area Under the Curve): 0.9782
+
+ROC Curve: Displaying the True Positive Rate against the False Positive Rate
+
+![Courbe Roc](https://github.com/user-attachments/assets/06bea6fc-4cc3-4d83-9947-58148e06df5f)
+
+The best model is Logistic Regression (LR) with an AUC of 0.9782246384308207.
+
+b. Classification: Sentiment Classification (NLP)
+The goal is to determine the sentiment of individuals based on their tweets towards U.S. airlines. The dataset contains 14,640 tweets, extracted from Twitter data in February 2015, and contributors were asked to label the tweets as positive, negative, or neutral.
+
+Techniques used:
+Natural Language Processing (NLP): Lowercasing, removing special characters and punctuation, tokenization, stopword removal, stemming, bag of words
+Supervised classification model: RandomForestClassifier
+Results:
+Accuracy score: 0.671448087431694
+Confusion Matrix
+
+![image](https://github.com/user-attachments/assets/17d71b35-3979-45cc-a642-0201615f008c)
+
+c. Regression: Advanced House Price Regression Techniques
+The Kaggle project "House Prices - Advanced Regression Techniques" is a popular competition where the goal is to predict house sale prices in Ames, Iowa, using various regression techniques. This competition is an excellent entry point for data science practitioners to explore advanced regression models, manipulate data, and understand the relationship between various house features and their sale prices. The dataset contains over 1460 rows, with 80 variables + the target variable.
+
+Techniques used:
+Outlier handling (methods: Z-scores and QQ plot)
+Data normalization (standardization)
+Feature selection (correlation matrix, VIF)
+Encoding categorical data
+Supervised classification model: XGBoost
+Results:
+RMSE score: 0.24954
+
+Kaggle submission predictions
+![image](https://github.com/user-attachments/assets/e7e58776-98e1-4eaf-906d-0a0d3d7c07b3)
+
+Analysis and interpretation of the XGBoost model using SHAP
+![image](https://github.com/user-attachments/assets/f0d14d39-1f8d-4bcc-8234-b2a4fdb7222d)
+
+OverallQual is a crucial feature in this model: a house with a high overall quality (represented in red) increases the predicted sale price, while a lower quality house (represented in blue) decreases the predicted price.
+
+2. Machine Learning: Unsupervised Learning
+a. Electricity Production Data Analysis
+The task is to analyze electricity production data. The goal of the study is to segment the days based on the power injection range (kW).
+
+Techniques used:
+Data engineering (groupby, normalization, boxplot)
+Hierarchical clustering (HAC)
+Principal Component Analysis (PCA)
+Results:
+PCA graphical representation
+![image](https://github.com/user-attachments/assets/9eaeeca5-63f8-4be7-bb1c-b31fba8bc63c)
+
+
+For our analysis, it was relevant to perform the analysis by month to examine if the power injection range shows consistent groupings of observations across different seasons (winter, spring, summer, fall). By analyzing the distribution of power injection by month, we notice a concentration of observations on the left side of the chart for the months of October, November, December, and January. This suggests an increase in power injection during the winter period. Conversely, for the months of April, May, and June, the points are mostly concentrated on the right side of the chart, indicating a decrease in power injection during the spring.
+
+3. Deep Learning
+a. Convolutional Neural Network: Chihuahua or Muffin
+The "Chihuahua or Muffin" dataset is a fun and popular collection used in computer vision and deep learning applications. This dataset is a classic image classification challenge where the goal is to distinguish photos of Chihuahua dogs from those of muffins, due to their surprising resemblance.
+
+Techniques used and accuracy results on the test dataset:
+Convolutional Neural Network (CNN) + Dropout: 0.9507042169570923
+Transfer Learning (Model VGG16): 0.9929577464788732
+Fine-Tuning (ResNet50 / freezing layers): 0.9929577708244324
+Keras Tuner: 0.625
+b. Capstone Project: Food Detection in Images
+This project was a capstone project in the "Expert in Data Science" master's program at INSA Rouen. The idea is to place ourselves in a context where a person has a set of ingredients and wishes to create a new recipe that does not yet exist. The goal is to invent a potentially delicious dish using the available ingredients.
+
+To do this, we developed a model that detects and identifies ingredients from an image. These ingredients will then be used to generate a new recipe (GPT-2 algorithm). In this project, I handled creating the database and detecting food items in the images.
+
+Techniques used:
+State-of-the-art on ingredient recognition
+Database creation (web scraping from Google Images + Kaggle data + image fusion)
+Yolov3 detection model
+ssdlite_mobilnet_v2 detection model
+Results:
+Detection on an image with ssdlite_mobilnet_v2
+
+
+
+The image shows:
+
+89% chance that the detected ingredient is an orange
+97% chance that the detected ingredient is a banana
+40% chance that the detected ingredient is an apple.
+c. Bird Song Recognition
+The Bird Song Dataset on Kaggle is a collection of bird songs, often used for audio classification projects and machine learning. This dataset contains audio recordings of bird songs from various species, making it an excellent tool for researchers and developers working on audio data analysis tasks, such as species identification by their song.
+
+Techniques used:
+Calculate the spectrogram via STFT (Short-Term Fourier Transform)
+Convert the spectrogram to decibels
+Normalize the values and provide the normalized spectrogram with the associated label
+Convolutional Neural Network
+Results:
+Model evaluation
+
+
+
+Confusion Matrix
+
+
+
+Score:
+
+F1: 0.9510736108330955 | Precision: 0.9504173755284869 | Recall: 0.9524755155991809 | AUC: 0.9979307755194758
+
+4. Large Language Model (LLM)
+a. Tweet Reviews (NLP)
+The goal is to determine the sentiment of individuals based on their tweets about U.S. airlines. The dataset contains 14,640 tweets, extracted from Twitter data in February 2015. In this case, we use an LLM (BERT) algorithm with Hugging Face to generate a score from 1 to 5 indicating the sentiment of the tweet.
+
+Results:
+
+
+b. Using RAG with the LLM model (LLaMa2)
+RAG (Retrieval-Augmented Generation) combines information retrieval and text generation to enhance the accuracy of responses by leveraging external data. By integrating relevant documents before the generation phase, it reduces hallucinations and provides more factual and up-to-date answers. I performed a test using my professional thesis PDF on the study and implementation of interpretability methods in car pricing models.
+
+5. API Development
+a. Restaurant Location and Recommendation
+In this project, I used MongoDB and Python to work with a popular New York restaurant database. This database includes information such as the name, address, cuisine type, geographical location (latitude and longitude coordinates), and restaurant ratings, including scores and grades given by customers. I developed an interactive map to visualize restaurant locations and integrated dynamic filters to allow users to refine their search based on cuisine type, maximum score, and restaurant grade.
