@@ -189,13 +189,13 @@ My Academic and Personal Projects
 This repository contains my academic and personal projects, mostly coded in Python and R. Below are some examples of projects I have worked on:
 
 ## 1. Machine Learning: Supervised Learning
-###a. Classification: Credit Card Fraud Detection
+### a. Classification: Credit Card Fraud Detection
 This project uses a dataset containing transactions made by European credit card holders in September 2013. The dataset consists of 284,807 transactions, of which 492 are fraudulent. The imbalance is significant, with the positive class (fraud) representing only 0.172% of the transactions.
 
-Goal:
+### Goal:
 Detect credit card fraud using supervised classification techniques.
 
-Models used:
+### Models used:
 Logistic Regression
 K-Nearest Neighbors
 Decision Tree
@@ -209,7 +209,7 @@ ROC Curve: Displaying the True Positive Rate against the False Positive Rate
 
 The best model is Logistic Regression (LR) with an AUC of 0.9782246384308207.
 
-b. Classification: Sentiment Classification (NLP)
+### b. Classification: Sentiment Classification (NLP)
 The goal is to determine the sentiment of individuals based on their tweets towards U.S. airlines. The dataset contains 14,640 tweets, extracted from Twitter data in February 2015, and contributors were asked to label the tweets as positive, negative, or neutral.
 
 Techniques used:
@@ -221,7 +221,7 @@ Confusion Matrix
 
 ![image](https://github.com/user-attachments/assets/17d71b35-3979-45cc-a642-0201615f008c)
 
-c. Regression: Advanced House Price Regression Techniques
+### c. Regression: Advanced House Price Regression Techniques
 The Kaggle project "House Prices - Advanced Regression Techniques" is a popular competition where the goal is to predict house sale prices in Ames, Iowa, using various regression techniques. This competition is an excellent entry point for data science practitioners to explore advanced regression models, manipulate data, and understand the relationship between various house features and their sale prices. The dataset contains over 1460 rows, with 80 variables + the target variable.
 
 Techniques used:
@@ -241,11 +241,11 @@ Analysis and interpretation of the XGBoost model using SHAP
 
 OverallQual is a crucial feature in this model: a house with a high overall quality (represented in red) increases the predicted sale price, while a lower quality house (represented in blue) decreases the predicted price.
 
-2. Machine Learning: Unsupervised Learning
-a. Electricity Production Data Analysis
+## 2. Machine Learning: Unsupervised Learning
+### a. Electricity Production Data Analysis
 The task is to analyze electricity production data. The goal of the study is to segment the days based on the power injection range (kW).
 
-Techniques used:
+### Techniques used:
 Data engineering (groupby, normalization, boxplot)
 Hierarchical clustering (HAC)
 Principal Component Analysis (PCA)
@@ -256,21 +256,21 @@ PCA graphical representation
 
 For our analysis, it was relevant to perform the analysis by month to examine if the power injection range shows consistent groupings of observations across different seasons (winter, spring, summer, fall). By analyzing the distribution of power injection by month, we notice a concentration of observations on the left side of the chart for the months of October, November, December, and January. This suggests an increase in power injection during the winter period. Conversely, for the months of April, May, and June, the points are mostly concentrated on the right side of the chart, indicating a decrease in power injection during the spring.
 
-3. Deep Learning
-a. Convolutional Neural Network: Chihuahua or Muffin
+## 3. Deep Learning
+### a. Convolutional Neural Network: Chihuahua or Muffin
 The "Chihuahua or Muffin" dataset is a fun and popular collection used in computer vision and deep learning applications. This dataset is a classic image classification challenge where the goal is to distinguish photos of Chihuahua dogs from those of muffins, due to their surprising resemblance.
 
-Techniques used and accuracy results on the test dataset:
+### Techniques used and accuracy results on the test dataset:
 Convolutional Neural Network (CNN) + Dropout: 0.9507042169570923
 Transfer Learning (Model VGG16): 0.9929577464788732
 Fine-Tuning (ResNet50 / freezing layers): 0.9929577708244324
 Keras Tuner: 0.625
-b. Capstone Project: Food Detection in Images
+### b. Capstone Project: Food Detection in Images
 This project was a capstone project in the "Expert in Data Science" master's program at INSA Rouen. The idea is to place ourselves in a context where a person has a set of ingredients and wishes to create a new recipe that does not yet exist. The goal is to invent a potentially delicious dish using the available ingredients.
 
 To do this, we developed a model that detects and identifies ingredients from an image. These ingredients will then be used to generate a new recipe (GPT-2 algorithm). In this project, I handled creating the database and detecting food items in the images.
 
-Techniques used:
+### Techniques used:
 State-of-the-art on ingredient recognition
 Database creation (web scraping from Google Images + Kaggle data + image fusion)
 Yolov3 detection model
@@ -278,7 +278,7 @@ ssdlite_mobilnet_v2 detection model
 Results:
 Detection on an image with ssdlite_mobilnet_v2
 
-
+![image](https://github.com/user-attachments/assets/318b17d3-4a7a-439b-a5be-d4a2692a2d41)
 
 The image shows:
 
@@ -296,26 +296,50 @@ Convolutional Neural Network
 Results:
 Model evaluation
 
+![image](https://github.com/user-attachments/assets/8d4de32f-fed4-4051-9dd7-7b807e8adb5d)
 
 
 Confusion Matrix
 
-
+![image](https://github.com/user-attachments/assets/f2c02ac9-1137-4ee6-afd9-edf934dba314)
 
 Score:
 
 F1: 0.9510736108330955 | Precision: 0.9504173755284869 | Recall: 0.9524755155991809 | AUC: 0.9979307755194758
 
-4. Large Language Model (LLM)
-a. Tweet Reviews (NLP)
+## 4. Large Language Model (LLM)
+### a. Tweet Reviews (NLP)
 The goal is to determine the sentiment of individuals based on their tweets about U.S. airlines. The dataset contains 14,640 tweets, extracted from Twitter data in February 2015. In this case, we use an LLM (BERT) algorithm with Hugging Face to generate a score from 1 to 5 indicating the sentiment of the tweet.
 
 Results:
 
 
-b. Using RAG with the LLM model (LLaMa2)
+### b. Using RAG with the LLM model (LLaMa2)
 RAG (Retrieval-Augmented Generation) combines information retrieval and text generation to enhance the accuracy of responses by leveraging external data. By integrating relevant documents before the generation phase, it reduces hallucinations and provides more factual and up-to-date answers. I performed a test using my professional thesis PDF on the study and implementation of interpretability methods in car pricing models.
 
-5. API Development
-a. Restaurant Location and Recommendation
+## 5. API Development
+### a. Restaurant Location and Recommendation
 In this project, I used MongoDB and Python to work with a popular New York restaurant database. This database includes information such as the name, address, cuisine type, geographical location (latitude and longitude coordinates), and restaurant ratings, including scores and grades given by customers. I developed an interactive map to visualize restaurant locations and integrated dynamic filters to allow users to refine their search based on cuisine type, maximum score, and restaurant grade.
+
+![image](https://github.com/user-attachments/assets/49c9096d-ed43-44cc-b6a1-ef771e3c3ec5)
+
+
+
+![image](https://github.com/user-attachments/assets/aca78036-a8f7-486a-ac68-ac57786d6636)
+
+### b. Iris Dataset
+The Iris dataset is one of the most famous datasets in machine learning. It contains 150 observations of flowers belonging to three different species: Iris-setosa, Iris-versicolor, and Iris-virginica. Each observation is described by 4 features:
+
+- Sepal length (in cm)
+- Sepal width (in cm)
+- Petal length (in cm)
+- Petal width (in cm)
+The goal is often to predict the species of the flower based on these features. This dataset is commonly used for classification tasks and to test different supervised learning algorithms.
+
+![image](https://github.com/user-attachments/assets/3d7d3aa0-2220-45f7-b075-87b7b25a97c5)
+
+## 6. Optimization Projects
+- Construction of a stadium within the shortest possible time. (cplex/python)
+- Graph theory: Dijkstra's algorithm, nearest neighbor.
+- Advanced optimization: Heuristic for the traveling salesman problem, stochastic optimization (Engie: renewable electricity mix in 2050).
+
