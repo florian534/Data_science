@@ -109,27 +109,6 @@ Détection sur une image avec ssdlite_mobilnet_v2
   - 89 % de chances que l’ingrédient détecté soit une orange
   - 97 % de chance que l’ingrédient détecté soit une banane
   - 40 % de chance que l’ingrédient détecté soit une pomme.
-### c. Reconnaissance des sons d'oiseaux
-Le Bird Song Dataset sur Kaggle est une collection de sons d'oiseaux, souvent utilisée pour des projets de classification audio et d'apprentissage automatique. Ce jeu de données contient des enregistrements audio de chants d'oiseaux de différentes espèces, ce qui en fait un excellent outil pour les chercheurs et les développeurs qui souhaitent travailler sur des tâches d'analyse de données audio, telles que la reconnaissance des espèces d'oiseaux par leur chant.
-
-#### Techniques utilisées
-- calculez le spectrogramme via la STFT (Transformée de Fourier à court terme)
-- convertir ce spectrogramme en décibels
-- normaliser les valeurs et donner le spectrogramme normalisé et l'étiquette associée
-- Réseau de neurones convolutionnels
-
-#### Résultats :
-Evaluation du modèle
-
-![image](https://github.com/user-attachments/assets/8d4de32f-fed4-4051-9dd7-7b807e8adb5d)
-
-Matrice de confusion
-
-![image](https://github.com/user-attachments/assets/f2c02ac9-1137-4ee6-afd9-edf934dba314)
-
-Score 
-
-F1: 0.9510736108330955 | Precision: 0.9504173755284869 | Recall: 0.9524755155991809 | AUC: 0.9979307755194758
 
 ## 4. Large Language Model (LLM)
 
@@ -286,27 +265,6 @@ The image shows:
 97% chance that the detected ingredient is a banana
 40% chance that the detected ingredient is an apple.
 
-### c. Bird Song Recognition
-The Bird Song Dataset on Kaggle is a collection of bird songs, often used for audio classification projects and machine learning. This dataset contains audio recordings of bird songs from various species, making it an excellent tool for researchers and developers working on audio data analysis tasks, such as species identification by their song.
-
-Techniques used:
-Calculate the spectrogram via STFT (Short-Term Fourier Transform)
-Convert the spectrogram to decibels
-Normalize the values and provide the normalized spectrogram with the associated label
-Convolutional Neural Network
-Results:
-Model evaluation
-
-![image](https://github.com/user-attachments/assets/8d4de32f-fed4-4051-9dd7-7b807e8adb5d)
-
-
-Confusion Matrix
-
-![image](https://github.com/user-attachments/assets/f2c02ac9-1137-4ee6-afd9-edf934dba314)
-
-Score:
-
-F1: 0.9510736108330955 | Precision: 0.9504173755284869 | Recall: 0.9524755155991809 | AUC: 0.9979307755194758
 
 ## 4. Large Language Model (LLM)
 ### a. Tweet Reviews (NLP)
