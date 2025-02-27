@@ -123,6 +123,9 @@ Le but est de connaître les sentiments des personnes par leurs tweets envers le
 
 Le RAG (Retrieval-Augmented Generation) combine la recherche d'informations et la génération de texte pour améliorer la précision des réponses en s'appuyant sur des données externes. En intégrant des documents pertinents avant la phase de génération, il permet de réduire les hallucinations et d'offrir des réponses plus factuelles et actualisées. J'ai réalisé un test en utilisant comme fichier PDF ma thèse professionnelle sur l'étude et implémentation des méthodes d'interprétabilité dans les modèles de tarification automobile.
 
+#### Résultats :
+![Image](https://github.com/user-attachments/assets/7336e37e-cc42-4a8b-8280-5dd7854dcd4d)
+
 ## 5. Création d'interface de programmation (API)
 
 ### a. Localisation et recommandation de restaurants
@@ -270,11 +273,14 @@ The image shows:
 ### a. Tweet Reviews (NLP)
 The goal is to determine the sentiment of individuals based on their tweets about U.S. airlines. The dataset contains 14,640 tweets, extracted from Twitter data in February 2015. In this case, we use an LLM (BERT) algorithm with Hugging Face to generate a score from 1 to 5 indicating the sentiment of the tweet.
 
-Results:
+#### Results:
 ![9migpjpi](https://github.com/user-attachments/assets/8b10c5c9-ebd1-4cca-aefb-91c7761515b8)
 
 ### b. Using RAG with the LLM model (LLaMa2)
 RAG (Retrieval-Augmented Generation) combines information retrieval and text generation to enhance the accuracy of responses by leveraging external data. By integrating relevant documents before the generation phase, it reduces hallucinations and provides more factual and up-to-date answers. I performed a test using my professional thesis PDF on the study and implementation of interpretability methods in car pricing models.
+
+#### Results::
+![Image](https://github.com/user-attachments/assets/7336e37e-cc42-4a8b-8280-5dd7854dcd4d)
 
 ## 5. API Development
 ### a. Restaurant Location and Recommendation
